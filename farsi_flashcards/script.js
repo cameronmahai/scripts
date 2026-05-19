@@ -4,7 +4,7 @@ let currentWord = {};
 let score = 0;
 let strikes = 0;
 let timerInterval = null;
-let timeLeft = 5000; // Updated to 5 seconds
+let timeLeft = 5000;
 
 const farsiWordEl = document.getElementById('farsi-word');
 const inputEl = document.getElementById('translation-input');
@@ -36,8 +36,8 @@ function resetQueue() {
 
 function startTimer() {
     clearInterval(timerInterval);
-    timeLeft = 5000; // Updated to 5 seconds
-    timerEl.innerText = "5.00"; // Updated to 5 seconds
+    timeLeft = 5000;
+    timerEl.innerText = "5.00";
     timerInterval = setInterval(() => {
         timeLeft -= 10;
         timerEl.innerText = (timeLeft / 1000).toFixed(2);
@@ -64,21 +64,24 @@ function registerStrike(message) {
     clearInterval(timerInterval);
     strikes++;
     strikesEl.innerText = strikes;
-    feedbackEl.innerText = `${message} (Word was "${currentWord.english}")`;
-    feedbackEl.style.color = "red";
     
     if (strikes >= 3) {
+        feedbackEl.innerText = `${message} The word was "${currentWord.english.join(', ')}"`;
+        feedbackEl.style.color = "red";
         strikes = 0;
         strikesEl.innerText = strikes;
-        setTimeout(nextWord, 2000);
+        setTimeout(nextWord, 3000);
     } else {
+        feedbackEl.innerText = `${message} (${3 - strikes} strikes left)`;
+        feedbackEl.style.color = "red";
         setTimeout(nextWord, 1000);
     }
 }
 
 function checkAnswer() {
     const translation = inputEl.value.trim().toLowerCase();
-    if (translation === currentWord.english) {
+    // Check if input matches any of the accepted English definitions
+    if (currentWord.english.includes(translation)) {
         clearInterval(timerInterval);
         score++;
         scoreEl.innerText = score;
