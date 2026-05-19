@@ -14,7 +14,8 @@ const baseDictionary = [
     { farsi: "خانه", english: "house" },
     { farsi: "کار", english: "work" },
     { farsi: "ساعت", english: "clock" },
-    { farsi: "شب", english: "night" }
+    { farsi: "شب", english: "night" },
+    { farsi: "روز", english: "day" } // Added 16th word to test the queue
 ];
 
 let wordQueue = [];
@@ -30,7 +31,12 @@ const strikesEl = document.getElementById('strikes');
 const submitBtn = document.getElementById('submit-btn');
 
 function resetQueue() {
-    wordQueue = [...baseDictionary].sort(() => Math.random() - 0.5);
+    // Fisher-Yates shuffle is better than sort(() => Math.random() - 0.5)
+    wordQueue = [...baseDictionary];
+    for (let i = wordQueue.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [wordQueue[i], wordQueue[j]] = [wordQueue[j], wordQueue[i]];
+    }
 }
 
 function nextWord() {
