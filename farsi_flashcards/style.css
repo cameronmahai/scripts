@@ -1,0 +1,5 @@
+body { font-family: sans-serif; text-align: center; background: #f0f0f0; }
+#app { max-width: 500px; margin: 50px auto; padding: 20px; background: white; border-radius: 10px; }
+input { padding: 10px; width: 80%; }
+button { padding: 10px 20px; }
+#feedback { font-weight: bold; }
