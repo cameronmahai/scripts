@@ -1,23 +1,4 @@
-// Expanded dictionary
-const baseDictionary = [
-    { farsi: "سلام", english: "hello" },
-    { farsi: "خداحافظ", english: "goodbye" },
-    { farsi: "بله", english: "yes" },
-    { farsi: "خیر", english: "no" },
-    { farsi: "ممنون", english: "thank you" },
-    { farsi: "لطفاً", english: "please" },
-    { farsi: "دوست", english: "friend" },
-    { farsi: "کتاب", english: "book" },
-    { farsi: "آب", english: "water" },
-    { farsi: "غذا", english: "food" },
-    { farsi: "خانواده", english: "family" },
-    { farsi: "خانه", english: "house" },
-    { farsi: "کار", english: "work" },
-    { farsi: "ساعت", english: "clock" },
-    { farsi: "شب", english: "night" },
-    { farsi: "روز", english: "day" } // Added 16th word to test the queue
-];
-
+let baseDictionary = [];
 let wordQueue = [];
 let currentWord = {};
 let score = 0;
@@ -30,8 +11,21 @@ const scoreEl = document.getElementById('score');
 const strikesEl = document.getElementById('strikes');
 const submitBtn = document.getElementById('submit-btn');
 
+// Load dictionary from JSON file
+async function loadDictionary() {
+    try {
+        const response = await fetch('dictionary.json');
+        baseDictionary = await response.json();
+        resetQueue();
+        nextWord();
+    } catch (error) {
+        console.error('Error loading dictionary:', error);
+        farsiWordEl.innerText = "Error loading dictionary.";
+    }
+}
+
 function resetQueue() {
-    // Fisher-Yates shuffle is better than sort(() => Math.random() - 0.5)
+    // Fisher-Yates shuffle
     wordQueue = [...baseDictionary];
     for (let i = wordQueue.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -76,12 +70,10 @@ function checkAnswer() {
 
 submitBtn.addEventListener('click', checkAnswer);
 
-// Allow Enter key
 inputEl.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {
         checkAnswer();
     }
 });
 
-resetQueue();
-nextWord();
+loadDictionary();
