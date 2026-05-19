@@ -25,6 +25,7 @@
         <label>Focus Drift: <input type="range" id="ballSpeed" min="100" max="2000" value="500"></label><br>
         <label>Rotation: <input type="range" id="rotSpeed" min="0" max="50" value="10"></label><br>
         <label>Intensities: <input type="range" id="numBalls" min="1" max="5" value="1"></label><br>
+        <label>Pulse Speed: <input type="range" id="pulseSpeed" min="1" max="20" value="5"></label><br>
         <button id="pauseBtn">Pause</button>
     </div>
     <canvas id="canvas"></canvas>
@@ -33,7 +34,6 @@
         const ctx = canvas.getContext('2d');
         let width, height;
         let isPaused = false;
-        let pauseTime = 0;
         let lastTime = performance.now();
 
         document.getElementById('pauseBtn').addEventListener('click', (e) => {
@@ -56,10 +56,7 @@
         const zones = [];
         for (let i = 0; i < numZones; i++) {
             const angle = (i / numZones) * 2 * Math.PI;
-            zones.push({
-                initialAngle: angle,
-                basePulse: 0
-            });
+            zones.push({ initialAngle: angle });
         }
 
         let awarenessNodes = [];
@@ -95,33 +92,40 @@
             ctx.clearRect(0, 0, width, height);
 
             const ballsOnZone = {};
-            awarenessNodes.forEach(node => {
-                if (!node.isMoving) {
-                    if (!ballsOnZone[node.currentZoneIndex]) ballsOnZone[node.currentZoneIndex] = 0;
-                    ballsOnZone[node.currentZoneIndex]++;
+            // Group nodes to handle overlap
+            const nodeGroups = {};
+            awarenessNodes.forEach((node, idx) => {
+                const zoneIdx = node.isMoving ? -1 : node.currentZoneIndex;
+                if (zoneIdx !== -1) {
+                    if (!nodeGroups[zoneIdx]) nodeGroups[zoneIdx] = [];
+                    nodeGroups[zoneIdx].push(node);
                 }
             });
 
             const currentPositions = zones.map(z => getZonePosition(z, rotation));
 
-            // Active Awareness: Rhythmic Pulse (Fixed to stop when paused)
-            const heartRate = 0.005;
-            const pulse = Math.sin(time * heartRate) * 0.2 + 0.8;
+            // Pulse Speed
+            const pulseSpeed = parseInt(document.getElementById('pulseSpeed').value) / 1000;
+            const pulse = Math.sin(time * pulseSpeed) * 0.2 + 0.8;
 
             currentPositions.forEach((pos, i) => {
-                const count = ballsOnZone[i] || 0;
+                const nodes = nodeGroups[i] || [];
+                const count = nodes.length;
                 const pulseIntensity = 1 + count * 0.5;
                 const finalScale = pulse * pulseIntensity;
 
                 ctx.beginPath();
                 ctx.arc(pos.x, pos.y, zoneRadius * finalScale, 0, 2 * Math.PI);
-                ctx.strokeStyle = count > 0 ? `hsl(${count * 60}, 100%, 50%)` : '#fff';
+                
+                // Color based on count: 1=Green, 2=Yellow, 3+=Red
+                ctx.strokeStyle = count >= 3 ? '#f00' : count === 2 ? '#ff0' : count === 1 ? '#0f0' : '#fff';
+                
                 ctx.lineWidth = 2 * finalScale;
                 ctx.stroke();
             });
 
             // Draw Awareness Nodes
-            awarenessNodes.forEach(node => {
+            awarenessNodes.forEach((node, idx) => {
                 let x, y, isStretched = false, angleToTarget = 0;
 
                 if (node.isMoving) {
@@ -133,16 +137,26 @@
                     angleToTarget = Math.atan2(end.y - start.y, end.x - start.x);
                 } else {
                     const pos = currentPositions[node.currentZoneIndex];
-                    x = pos.x; y = pos.y;
+                    const group = nodeGroups[node.currentZoneIndex];
+                    const nodeIdx = group.indexOf(node);
+                    const count = group.length;
+
+                    if (count > 1) {
+                        const angle = (nodeIdx / count) * 2 * Math.PI;
+                        x = pos.x + (zoneRadius * 0.4) * Math.cos(angle);
+                        y = pos.y + (zoneRadius * 0.4) * Math.sin(angle);
+                    } else {
+                        x = pos.x; y = pos.y;
+                    }
                 }
 
                 ctx.beginPath();
                 if (isStretched) {
                     ctx.ellipse(x, y, awarenessRadius * 1.5, awarenessRadius, angleToTarget, 0, 2 * Math.PI);
-                    ctx.fillStyle = '#ff0'; // Moving
+                    ctx.fillStyle = '#ff0';
                 } else {
                     ctx.arc(x, y, awarenessRadius, 0, 2 * Math.PI);
-                    ctx.fillStyle = '#0f0'; // Resting
+                    ctx.fillStyle = '#0f0';
                 }
                 ctx.fill();
             });
