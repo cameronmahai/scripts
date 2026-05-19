@@ -67,6 +67,10 @@
         let lastTime = performance.now();
         
         let compHistory = { compatible: 0, incompatible: 0 };
+        
+        // Soft Palette
+        const COLOR_COMPATIBLE = "#88b378"; // Muted Green
+        const COLOR_INCOMPATIBLE = "#d18a8f"; // Muted Rose
 
         document.getElementById('pauseBtn').addEventListener('click', (e) => {
             isPaused = !isPaused;
@@ -204,7 +208,7 @@
                     ctx.arc(0, 0, this.zoneRadius * finalScale, 0, 2 * Math.PI);
                     ctx.restore();
                     
-                    ctx.strokeStyle = count >= 3 ? '#ff6b6b' : count === 2 ? '#f1c40f' : count === 1 ? '#2ecc71' : '#ecf0f1';
+                    ctx.strokeStyle = count >= 3 ? COLOR_INCOMPATIBLE : count === 2 ? '#f1c40f' : count === 1 ? COLOR_COMPATIBLE : '#ecf0f1';
                     ctx.lineWidth = 3 * finalScale;
                     ctx.stroke();
                 });
@@ -239,8 +243,8 @@
                         ctx.strokeStyle = '#a1880a';
                     } else {
                         ctx.arc(x, y, this.awarenessRadius, 0, 2 * Math.PI);
-                        ctx.fillStyle = '#2ecc71'; 
-                        ctx.strokeStyle = '#1e8449';
+                        ctx.fillStyle = COLOR_COMPATIBLE; 
+                        ctx.strokeStyle = '#5a7c4f'; // Darker muted green
                     }
                     ctx.lineWidth = 4;
                     ctx.stroke();
@@ -268,19 +272,19 @@
             
             if (type1 === null || type2 === null) {
                 currentUI.innerText = "Status: Calculating...";
+                currentUI.style.color = "#ccc";
                 return;
             }
             const compatible = (type1 + type2) % 2 === 0;
             currentUI.innerText = compatible ? "Status: Compatible" : "Status: Incompatible";
-            currentUI.style.color = compatible ? "#2ecc71" : "#ff6b6b";
+            currentUI.style.color = compatible ? COLOR_COMPATIBLE : COLOR_INCOMPATIBLE;
             
-            // Track history
             compHistory[compatible ? 'compatible' : 'incompatible']++;
 
             const total = compHistory.compatible + compHistory.incompatible;
             const overallCompatible = compHistory.compatible >= compHistory.incompatible;
             overallUI.innerText = overallCompatible ? "Overall: Compatible" : "Overall: Incompatible";
-            overallUI.style.color = overallCompatible ? "#2ecc71" : "#ff6b6b";
+            overallUI.style.color = overallCompatible ? COLOR_COMPATIBLE : COLOR_INCOMPATIBLE;
         }
 
         function drawPieChart() {
@@ -295,13 +299,13 @@
             ctx.beginPath();
             ctx.moveTo(centerX, centerY);
             ctx.arc(centerX, centerY, radius, 0, compAngle);
-            ctx.fillStyle = "#2ecc71";
+            ctx.fillStyle = COLOR_COMPATIBLE;
             ctx.fill();
             
             ctx.beginPath();
             ctx.moveTo(centerX, centerY);
             ctx.arc(centerX, centerY, radius, compAngle, 2 * Math.PI);
-            ctx.fillStyle = "#ff6b6b";
+            ctx.fillStyle = COLOR_INCOMPATIBLE;
             ctx.fill();
         }
 
