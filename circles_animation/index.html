@@ -56,8 +56,8 @@
         const zones = [];
         for (let i = 0; i < numZones; i++) {
             const angle = (i / numZones) * 2 * Math.PI;
-            // deformation is now an object tracking the impact
-            zones.push({ initialAngle: angle, impact: 0 });
+            // impactPhase: 0=Idle, 1=Big, 2=Med, 3=Tiny
+            zones.push({ initialAngle: angle, impactPhase: 0, impactTime: 0 });
         }
 
         let awarenessNodes = [];
@@ -90,23 +90,6 @@
             };
         }
 
-        // Draw Liquid Membrane (Deformed Circle)
-        function drawLiquidCircle(ctx, x, y, radius, impact, time) {
-            ctx.beginPath();
-            const segments = 64;
-            for (let i = 0; i <= segments; i++) {
-                const angle = (i / segments) * 2 * Math.PI;
-                // Deform the surface based on the impact
-                const surfaceNoise = Math.sin(angle * 8 + time * 0.05) * impact * 10;
-                const r = radius + surfaceNoise;
-                const px = x + r * Math.cos(angle);
-                const py = y + r * Math.sin(angle);
-                if (i === 0) ctx.moveTo(px, py);
-                else ctx.lineTo(px, py);
-            }
-            ctx.closePath();
-        }
-
         function draw(rotation, time) {
             ctx.clearRect(0, 0, width, height);
 
@@ -129,15 +112,35 @@
                 const count = nodes.length;
                 const zone = zones[i];
                 
-                // Decay impact
-                if (zone.impact > 0) zone.impact -= 0.03;
-                if (zone.impact < 0) zone.impact = 0;
+                // Update impact
+                if (!isPaused && zone.impactPhase > 0) {
+                    zone.impactTime += 16.6; // Assuming ~60fps
+                    if (zone.impactTime >= 166) {
+                        zone.impactPhase++;
+                        zone.impactTime = 0;
+                        if (zone.impactPhase > 3) zone.impactPhase = 0;
+                    }
+                }
 
                 const vibration = (!isPaused && count > 1) ? (Math.random() - 0.5) * count * 4 : 0;
+
                 const pulseIntensity = 1 + count * 0.3;
                 const finalScale = pulse * pulseIntensity;
 
-                drawLiquidCircle(ctx, pos.x + vibration, pos.y + vibration, zoneRadius * finalScale, zone.impact * 3, time);
+                // Elliptical deformation based on phase
+                let scaleX = 1;
+                let scaleY = 1;
+                if (zone.impactPhase === 1) { scaleX = 1.3; scaleY = 0.7; }
+                else if (zone.impactPhase === 2) { scaleX = 1.1; scaleY = 0.9; }
+                else if (zone.impactPhase === 3) { scaleX = 1.05; scaleY = 0.95; }
+
+                ctx.save();
+                ctx.translate(pos.x + vibration, pos.y + vibration);
+                ctx.scale(scaleX, scaleY);
+
+                ctx.beginPath();
+                ctx.arc(0, 0, zoneRadius * finalScale, 0, 2 * Math.PI);
+                ctx.restore();
                 
                 ctx.strokeStyle = count >= 3 ? '#ff6b6b' : count === 2 ? '#f1c40f' : count === 1 ? '#2ecc71' : '#ecf0f1';
                 ctx.lineWidth = 3 * finalScale;
@@ -208,8 +211,9 @@
                         node.progress += dt / speed;
                         if (node.progress >= 1) {
                             node.progress = 0;
-                            // Trigger impact deformation
-                            zones[node.targetZoneIndex].impact = 1;
+                            // Trigger impact sequence
+                            zones[node.targetZoneIndex].impactPhase = 1;
+                            zones[node.targetZoneIndex].impactTime = 0;
                             
                             node.currentZoneIndex = node.targetZoneIndex;
                             node.targetZoneIndex = getWeightedNextZone(node.currentZoneIndex);
