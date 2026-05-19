@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dual Consciousness</title>
+    <style>
+        body { margin: 0; overflow: hidden; background: #2c3e50; }
+        canvas { display: block; }
+        .controls {
+            position: absolute;
+            top: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: sans-serif;
+            z-index: 10;
+        }
+        #controls1 { left: 10px; }
+        #controls2 { right: 10px; }
+    </style>
+</head>
+<body>
+    <div id="controls1" class="controls">
+        <h3>Consciousness 1</h3>
+        <label>Drift: <input type="range" id="ballSpeed1" min="100" max="2000" value="500"></label><br>
+        <label>Rotation: <input type="range" id="rotSpeed1" min="0" max="50" value="10"></label><br>
+        <label>Intensity: <input type="range" id="numNodes1" min="1" max="5" value="1"></label><br>
+        <label>Pulse: <input type="range" id="pulseSpeed1" min="1" max="20" value="5"></label>
+    </div>
+    <div id="controls2" class="controls">
+        <h3>Consciousness 2</h3>
+        <label>Drift: <input type="range" id="ballSpeed2" min="100" max="2000" value="500"></label><br>
+        <label>Rotation: <input type="range" id="rotSpeed2" min="0" max="50" value="10"></label><br>
+        <label>Intensity: <input type="range" id="numNodes2" min="1" max="5" value="1"></label><br>
+        <label>Pulse: <input type="range" id="pulseSpeed2" min="1" max="20" value="5"></label>
+    </div>
+    <button id="pauseBtn" style="position:absolute; top:10px; left:50%; z-index:10;">Pause</button>
+    <canvas id="canvas"></canvas>
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+        let isPaused = false;
+        let lastTime = performance.now();
+
+        document.getElementById('pauseBtn').addEventListener('click', (e) => {
+            isPaused = !isPaused;
+            e.target.innerText = isPaused ? 'Resume' : 'Pause';
+        });
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        class Consciousness {
+            constructor(id, centerX, centerY) {
+                this.id = id;
+                this.centerX = centerX;
+                this.centerY = centerY;
+                this.radius = 120; // Smaller radius to fit two
+                this.zoneRadius = 30;
+                this.awarenessRadius = 10;
+                this.numZones = 7;
+                this.zones = [];
+                for (let i = 0; i < this.numZones; i++) {
+                    this.zones.push({ initialAngle: (i / this.numZones) * 2 * Math.PI, impactPhase: 0, impactTime: 0, ripples: [] });
+                }
+                this.nodes = [this.createNode()];
+                this.totalRotation = 0;
+            }
+
+            createNode() {
+                const current = Math.floor(Math.random() * this.numZones);
+                return {
+                    currentZoneIndex: current,
+                    targetZoneIndex: this.getWeightedNextZone(current),
+                    progress: 0,
+                    isMoving: false,
+                    lastTime: performance.now(),
+                    pauseStartTime: performance.now(),
+                    pauseDuration: Math.random() * 3500 + 500
+                };
+            }
+
+            getWeightedNextZone(current) {
+                const r = Math.random();
+                if (r < 0.7) return (current + 1) % this.numZones;
+                if (r < 0.9) return (current - 1 + this.numZones) % this.numZones;
+                return Math.floor(Math.random() * this.numZones);
+            }
+
+            getZonePosition(zone, rotation) {
+                const angle = zone.initialAngle + rotation;
+                return {
+                    x: this.centerX + this.radius * Math.cos(angle),
+                    y: this.centerY + this.radius * Math.sin(angle)
+                };
+            }
+
+            update(dt, currentTime, pulseSpeed) {
+                const numNodes = parseInt(document.getElementById('numNodes' + this.id).value);
+                while (this.nodes.length < numNodes) this.nodes.push(this.createNode());
+                while (this.nodes.length > numNodes) this.nodes.pop();
+
+                const speed = parseInt(document.getElementById('ballSpeed' + this.id).value);
+                const rotSpeed = parseInt(document.getElementById('rotSpeed' + this.id).value) / 2000;
+                this.totalRotation += rotSpeed;
+
+                this.nodes.forEach(node => {
+                    if (node.isMoving) {
+                        node.progress += dt / speed;
+                        if (node.progress >= 1) {
+                            node.progress = 0;
+                            this.zones[node.targetZoneIndex].impactPhase = 1;
+                            this.zones[node.targetZoneIndex].impactTime = 0;
+                            node.currentZoneIndex = node.targetZoneIndex;
+                            node.targetZoneIndex = this.getWeightedNextZone(node.currentZoneIndex);
+                            node.isMoving = false;
+                            node.pauseStartTime = currentTime;
+                            node.pauseDuration = Math.random() * 3500 + 500;
+                        }
+                    } else if (currentTime - node.pauseStartTime > node.pauseDuration) {
+                        node.isMoving = true;
+                    }
+                });
+            }
+
+            draw(time) {
+                const nodeGroups = {};
+                this.nodes.forEach(node => {
+                    const zoneIdx = node.isMoving ? -1 : node.currentZoneIndex;
+                    if (zoneIdx !== -1) {
+                        if (!nodeGroups[zoneIdx]) nodeGroups[zoneIdx] = [];
+                        nodeGroups[zoneIdx].push(node);
+                    }
+                });
+
+                const currentPositions = this.zones.map(z => this.getZonePosition(z, this.totalRotation));
+                const pulseSpeed = parseInt(document.getElementById('pulseSpeed' + this.id).value) / 1000;
+                const pulse = Math.sin(time * pulseSpeed) * 0.2 + 0.8;
+
+                currentPositions.forEach((pos, i) => {
+                    const nodes = nodeGroups[i] || [];
+                    const count = nodes.length;
+                    const zone = this.zones[i];
+                    
+                    if (!isPaused && zone.impactPhase > 0) {
+                        zone.impactTime += 16.6; 
+                        if (zone.impactTime >= 400) {
+                            zone.impactPhase++;
+                            zone.impactTime = 0;
+                            if (zone.impactPhase > 3) zone.impactPhase = 0;
+                        }
+                    }
+
+                    const vibration = (!isPaused && count > 1) ? (Math.random() - 0.5) * count * 4 : 0;
+                    const pulseIntensity = 1 + count * 0.3;
+                    const finalScale = pulse * pulseIntensity;
+
+                    // Elliptical deformation
+                    let scaleX = 1;
+                    let scaleY = 1;
+                    if (zone.impactPhase > 0) {
+                        const wobble = Math.sin(zone.impactTime * 0.03) * (0.4 / zone.impactPhase);
+                        scaleX = 1 + wobble;
+                        scaleY = 1 - wobble;
+                    }
+
+                    ctx.save();
+                    ctx.translate(pos.x + vibration, pos.y + vibration);
+                    ctx.scale(scaleX, scaleY);
+                    ctx.beginPath();
+                    ctx.arc(0, 0, this.zoneRadius * finalScale, 0, 2 * Math.PI);
+                    ctx.restore();
+                    
+                    ctx.strokeStyle = count >= 3 ? '#ff6b6b' : count === 2 ? '#f1c40f' : count === 1 ? '#2ecc71' : '#ecf0f1';
+                    ctx.lineWidth = 3 * finalScale;
+                    ctx.stroke();
+                });
+
+                this.nodes.forEach((node) => {
+                    let x, y, isStretched = false, angleToTarget = 0;
+                    if (node.isMoving) {
+                        const start = currentPositions[node.currentZoneIndex];
+                        const end = currentPositions[node.targetZoneIndex];
+                        x = start.x + (end.x - start.x) * node.progress;
+                        y = start.y + (end.y - start.y) * node.progress;
+                        isStretched = true;
+                        angleToTarget = Math.atan2(end.y - start.y, end.x - start.x);
+                    } else {
+                        const pos = currentPositions[node.currentZoneIndex];
+                        const group = nodeGroups[node.currentZoneIndex];
+                        const nodeIdx = group.indexOf(node);
+                        const count = group.length;
+                        if (count > 1) {
+                            const angle = (nodeIdx / count) * 2 * Math.PI;
+                            x = pos.x + (this.zoneRadius * 0.4) * Math.cos(angle);
+                            y = pos.y + (this.zoneRadius * 0.4) * Math.sin(angle);
+                        } else {
+                            x = pos.x; y = pos.y;
+                        }
+                    }
+
+                    ctx.beginPath();
+                    if (isStretched) {
+                        ctx.ellipse(x, y, this.awarenessRadius * 1.5, this.awarenessRadius, angleToTarget, 0, 2 * Math.PI);
+                        ctx.fillStyle = '#f1c40f'; 
+                        ctx.strokeStyle = '#a1880a';
+                    } else {
+                        ctx.arc(x, y, this.awarenessRadius, 0, 2 * Math.PI);
+                        ctx.fillStyle = '#2ecc71'; 
+                        ctx.strokeStyle = '#1e8449';
+                    }
+                    ctx.lineWidth = 4;
+                    ctx.stroke();
+                    ctx.fill();
+                });
+            }
+        }
+
+        const consciousnesses = [
+            new Consciousness(1, width / 4, height / 2),
+            new Consciousness(2, 3 * width / 4, height / 2)
+        ];
+
+        let runningTime = 0;
+        function animate(currentTime) {
+            const dt = currentTime - lastTime;
+            lastTime = currentTime;
+
+            if (!isPaused) {
+                runningTime += dt;
+                consciousnesses.forEach(c => c.update(dt, currentTime));
+            }
+            ctx.clearRect(0, 0, width, height);
+            consciousnesses.forEach(c => c.draw(runningTime));
+            requestAnimationFrame(animate);
+        }
+
+        requestAnimationFrame(animate);
+    </script>
+</body>
+</html>
