@@ -33,6 +33,8 @@
         const ctx = canvas.getContext('2d');
         let width, height;
         let isPaused = false;
+        let pauseTime = 0;
+        let lastTime = performance.now();
 
         document.getElementById('pauseBtn').addEventListener('click', (e) => {
             isPaused = !isPaused;
@@ -74,10 +76,8 @@
             };
         }
 
-        // Focus Gravity: Weighted Markov Chain
         function getWeightedNextZone(current) {
             const r = Math.random();
-            // High probability to move to adjacent zones (drift), low to jump
             if (r < 0.7) return (current + 1) % numZones;
             if (r < 0.9) return (current - 1 + numZones) % numZones;
             return Math.floor(Math.random() * numZones);
@@ -104,13 +104,13 @@
 
             const currentPositions = zones.map(z => getZonePosition(z, rotation));
 
-            // Active Awareness: Rhythmic Pulse
+            // Active Awareness: Rhythmic Pulse (Fixed to stop when paused)
             const heartRate = 0.005;
             const pulse = Math.sin(time * heartRate) * 0.2 + 0.8;
 
             currentPositions.forEach((pos, i) => {
                 const count = ballsOnZone[i] || 0;
-                const pulseIntensity = 1 + count * 0.5; // More balls = higher pulse
+                const pulseIntensity = 1 + count * 0.5;
                 const finalScale = pulse * pulseIntensity;
 
                 ctx.beginPath();
@@ -122,27 +122,42 @@
 
             // Draw Awareness Nodes
             awarenessNodes.forEach(node => {
-                let x, y;
+                let x, y, isStretched = false, angleToTarget = 0;
+
                 if (node.isMoving) {
                     const start = currentPositions[node.currentZoneIndex];
                     const end = currentPositions[node.targetZoneIndex];
                     x = start.x + (end.x - start.x) * node.progress;
                     y = start.y + (end.y - start.y) * node.progress;
+                    isStretched = true;
+                    angleToTarget = Math.atan2(end.y - start.y, end.x - start.x);
                 } else {
                     const pos = currentPositions[node.currentZoneIndex];
                     x = pos.x; y = pos.y;
                 }
+
                 ctx.beginPath();
-                ctx.arc(x, y, awarenessRadius, 0, 2 * Math.PI);
-                ctx.fillStyle = '#0f0';
+                if (isStretched) {
+                    ctx.ellipse(x, y, awarenessRadius * 1.5, awarenessRadius, angleToTarget, 0, 2 * Math.PI);
+                    ctx.fillStyle = '#ff0'; // Moving
+                } else {
+                    ctx.arc(x, y, awarenessRadius, 0, 2 * Math.PI);
+                    ctx.fillStyle = '#0f0'; // Resting
+                }
                 ctx.fill();
             });
         }
 
         let totalRotation = 0;
-        let lastTimestamp = performance.now();
+        let runningTime = 0;
+
         function animate(currentTime) {
+            const dt = currentTime - lastTime;
+            lastTime = currentTime;
+
             if (!isPaused) {
+                runningTime += dt;
+                
                 const numNodes = parseInt(document.getElementById('numBalls').value);
                 while (awarenessNodes.length < numNodes) awarenessNodes.push(createNode());
                 while (awarenessNodes.length > numNodes) awarenessNodes.pop();
@@ -152,7 +167,6 @@
                 totalRotation += rotSpeed;
 
                 awarenessNodes.forEach(node => {
-                    const dt = currentTime - lastTimestamp;
                     if (node.isMoving) {
                         node.progress += dt / speed;
                         if (node.progress >= 1) {
@@ -166,9 +180,8 @@
                         node.isMoving = true;
                     }
                 });
-                lastTimestamp = currentTime;
             }
-            draw(totalRotation, currentTime);
+            draw(totalRotation, runningTime);
             requestAnimationFrame(animate);
         }
 
