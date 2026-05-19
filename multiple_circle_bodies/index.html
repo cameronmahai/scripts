@@ -29,9 +29,11 @@
             padding: 15px 30px;
             border-radius: 20px;
             font-family: sans-serif;
-            font-size: 1.2em;
+            text-align: center;
             z-index: 10;
         }
+        #current-status { font-size: 1.2em; font-weight: bold; }
+        #overall-status { font-size: 1em; margin-top: 5px; color: #ccc; }
     </style>
 </head>
 <body>
@@ -50,12 +52,16 @@
         <label>Pulse: <input type="range" id="pulseSpeed2" min="1" max="20" value="5"></label>
     </div>
     <button id="pauseBtn" style="position:absolute; top:10px; left:50%; z-index:10;">Pause</button>
-    <div id="compatibility-ui">Status: Checking...</div>
+    <div id="compatibility-ui">
+        <div id="current-status">Status: Calculating...</div>
+        <div id="overall-status">Overall: Calculating...</div>
+    </div>
     <canvas id="canvas"></canvas>
     <script>
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
-        const compUI = document.getElementById('compatibility-ui');
+        const currentUI = document.getElementById('current-status');
+        const overallUI = document.getElementById('overall-status');
         let width, height;
         let isPaused = false;
         let lastTime = performance.now();
@@ -261,15 +267,20 @@
             const type2 = consciousnesses[1].getActiveZoneType();
             
             if (type1 === null || type2 === null) {
-                compUI.innerText = "Status: Calculating...";
+                currentUI.innerText = "Status: Calculating...";
                 return;
             }
             const compatible = (type1 + type2) % 2 === 0;
-            compUI.innerText = compatible ? "Status: Compatible" : "Status: Incompatible";
-            compUI.style.color = compatible ? "#2ecc71" : "#ff6b6b";
+            currentUI.innerText = compatible ? "Status: Compatible" : "Status: Incompatible";
+            currentUI.style.color = compatible ? "#2ecc71" : "#ff6b6b";
             
             // Track history
             compHistory[compatible ? 'compatible' : 'incompatible']++;
+
+            const total = compHistory.compatible + compHistory.incompatible;
+            const overallCompatible = compHistory.compatible >= compHistory.incompatible;
+            overallUI.innerText = overallCompatible ? "Overall: Compatible" : "Overall: Incompatible";
+            overallUI.style.color = overallCompatible ? "#2ecc71" : "#ff6b6b";
         }
 
         function drawPieChart() {
@@ -281,14 +292,12 @@
             const radius = 50;
             const compAngle = (compHistory.compatible / total) * 2 * Math.PI;
             
-            // Compatible slice
             ctx.beginPath();
             ctx.moveTo(centerX, centerY);
             ctx.arc(centerX, centerY, radius, 0, compAngle);
             ctx.fillStyle = "#2ecc71";
             ctx.fill();
             
-            // Incompatible slice
             ctx.beginPath();
             ctx.moveTo(centerX, centerY);
             ctx.arc(centerX, centerY, radius, compAngle, 2 * Math.PI);
