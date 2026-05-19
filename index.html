@@ -103,13 +103,15 @@
             });
 
             // Update holding time
-            circles.forEach((circle, index) => {
-                if (ballsOnCircle[index]) {
-                    circle.holdingTime += 0.01;
-                } else {
-                    circle.holdingTime = 0;
-                }
-            });
+            if (!isPaused) {
+                circles.forEach((circle, index) => {
+                    if (ballsOnCircle[index]) {
+                        circle.holdingTime += 0.01;
+                    } else {
+                        circle.holdingTime = 0;
+                    }
+                });
+            }
 
             // Recalculate circle positions based on rotation
             const currentPositions = circles.map(c => getCirclePosition(c, rotation));
@@ -123,8 +125,10 @@
                 let scale = 1;
                 if (circle.reactionProgress > 0) {
                     scale = 1 + Math.sin(circle.reactionProgress * Math.PI) * 0.3;
-                    circle.reactionProgress -= 0.05;
-                    if (circle.reactionProgress < 0) circle.reactionProgress = 0;
+                    if (!isPaused) {
+                        circle.reactionProgress -= 0.05;
+                        if (circle.reactionProgress < 0) circle.reactionProgress = 0;
+                    }
                 }
                 
                 // Hot Potato
@@ -193,8 +197,6 @@
         let lastTimestamp = performance.now();
         function animate(currentTime) {
             if (!isPaused) {
-                const deltaTime = currentTime - lastTimestamp;
-                
                 // Update num balls
                 const targetNumBalls = parseInt(document.getElementById('numBalls').value);
                 while (balls.length < targetNumBalls) {
@@ -210,7 +212,7 @@
                 totalRotation += rotSpeed;
 
                 balls.forEach(ball => {
-                    const ballDeltaTime = currentTime - ball.lastTime;
+                    const ballDeltaTime = currentTime - lastTimestamp;
                     ball.lastTime = currentTime;
 
                     if (ball.isMoving) {
@@ -236,13 +238,9 @@
                         }
                     }
                 });
-                
-                lastTimestamp = currentTime;
-            } else {
-                // If paused, keep track of time to avoid jumps
-                lastTimestamp = currentTime;
             }
-
+            
+            lastTimestamp = currentTime;
             draw(totalRotation);
             requestAnimationFrame(animate);
         }
