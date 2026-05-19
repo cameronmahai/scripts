@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inner Mind Animation</title>
     <style>
-        body { margin: 0; overflow: hidden; background: #2c3e50; } /* Soft dark pastel blue/gray */
+        body { margin: 0; overflow: hidden; background: #2c3e50; }
         canvas { display: block; }
         #controls {
             position: absolute;
@@ -69,7 +69,9 @@
                 progress: 0,
                 isMoving: false,
                 lastTime: performance.now(),
-                pauseStartTime: performance.now()
+                pauseStartTime: performance.now(),
+                // Random focus duration: 500ms to 4000ms
+                pauseDuration: Math.random() * 3500 + 500
             };
         }
 
@@ -88,7 +90,6 @@
             };
         }
 
-        // Draw Membrane Effect (Bouncy/Mushy)
         function drawMembraneCircle(ctx, x, y, radius, deformation) {
             ctx.beginPath();
             const segments = 32;
@@ -168,14 +169,14 @@
                 ctx.beginPath();
                 if (isStretched) {
                     ctx.ellipse(x, y, awarenessRadius * 1.5, awarenessRadius, angleToTarget, 0, 2 * Math.PI);
-                    ctx.fillStyle = '#f1c40f'; // Yellow
-                    ctx.strokeStyle = '#a1880a'; // Darker gold
+                    ctx.fillStyle = '#f1c40f'; 
+                    ctx.strokeStyle = '#a1880a';
                 } else {
                     ctx.arc(x, y, awarenessRadius, 0, 2 * Math.PI);
-                    ctx.fillStyle = '#2ecc71'; // Green
-                    ctx.strokeStyle = '#1e8449'; // Darker green
+                    ctx.fillStyle = '#2ecc71'; 
+                    ctx.strokeStyle = '#1e8449';
                 }
-                ctx.lineWidth = 4; // Stronger outline
+                ctx.lineWidth = 4;
                 ctx.stroke();
                 ctx.fill();
             });
@@ -210,8 +211,10 @@
                             node.targetZoneIndex = getWeightedNextZone(node.currentZoneIndex);
                             node.isMoving = false;
                             node.pauseStartTime = currentTime;
+                            // Reset random duration for next pause
+                            node.pauseDuration = Math.random() * 3500 + 500;
                         }
-                    } else if (currentTime - node.pauseStartTime > 1000) {
+                    } else if (currentTime - node.pauseStartTime > node.pauseDuration) {
                         node.isMoving = true;
                     }
                 });
