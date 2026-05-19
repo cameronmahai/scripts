@@ -34,6 +34,7 @@
         }
         #current-status { font-size: 1.2em; font-weight: bold; }
         #overall-status { font-size: 1em; margin-top: 5px; color: #ccc; }
+        .memory-debug { font-size: 0.8em; margin-top: 5px; color: #aaa; }
     </style>
 </head>
 <body>
@@ -42,12 +43,14 @@
         <label>Focus: <input type="range" id="focus1" min="100" max="2000" value="500"></label><br>
         <label>Intelligence: <input type="range" id="intelligence1" min="1" max="5" value="1"></label><br>
         <label>Adaptability: <input type="range" id="adapt1" min="0" max="100" value="50"></label>
+        <div id="memory1" class="memory-debug">Memory: [0, 0]</div>
     </div>
     <div id="controls2" class="controls">
         <h3>Consciousness 2</h3>
         <label>Focus: <input type="range" id="focus2" min="100" max="2000" value="500"></label><br>
         <label>Intelligence: <input type="range" id="intelligence2" min="1" max="5" value="1"></label><br>
         <label>Adaptability: <input type="range" id="adapt2" min="0" max="100" value="50"></label>
+        <div id="memory2" class="memory-debug">Memory: [0, 0]</div>
     </div>
     <button id="pauseBtn" style="position:absolute; top:10px; left:50%; z-index:10;">Pause</button>
     <div id="compatibility-ui">
@@ -60,6 +63,8 @@
         const ctx = canvas.getContext('2d');
         const currentUI = document.getElementById('current-status');
         const overallUI = document.getElementById('overall-status');
+        const memUI1 = document.getElementById('memory1');
+        const memUI2 = document.getElementById('memory2');
         let width, height;
         let isPaused = false;
         let lastTime = performance.now();
@@ -92,11 +97,12 @@
                 this.awarenessRadius = 10;
                 this.numZones = 7;
                 this.zones = [];
+                // Memory: map type to status (1=comp, -1=incomp, 0=unknown)
+                this.memory = {0: 0, 1: 0}; 
                 for (let i = 0; i < this.numZones; i++) {
                     this.zones.push({ 
                         initialAngle: (i / this.numZones) * 2 * Math.PI, 
-                        impactPhase: 0, 
-                        impactTime: 0, 
+                        impactPhase: 0, impactTime: 0, 
                         type: Math.floor(Math.random() * 2) 
                     });
                 }
@@ -119,8 +125,14 @@
                 const adapt = parseInt(document.getElementById('adapt' + this.id).value) / 100;
                 const weights = this.zones.map((z, i) => {
                     if (i === current) return 0;
-                    return Math.max(0.1, 1);
+                    let weight = 1;
+                    // Bias based on learned compatibility
+                    const mem = this.memory[z.type];
+                    if (mem > 0) weight += adapt * 5; // Stronger bias
+                    if (mem < 0) weight -= adapt * 0.8; // Bias against
+                    return Math.max(0.1, weight);
                 });
+                
                 const totalWeight = weights.reduce((a, b) => a + b, 0);
                 let r = Math.random() * totalWeight;
                 for (let i = 0; i < weights.length; i++) {
@@ -129,6 +141,14 @@
                 }
                 return (current + 1) % this.numZones;
             }
+
+            learn(zoneType, isCompatible) {
+                const adapt = parseInt(document.getElementById('adapt' + this.id).value) / 100;
+                if (Math.random() < adapt) {
+                    this.memory[zoneType] = isCompatible ? 1 : -1;
+                }
+            }
+
             getZonePosition(zone) {
                 const angle = zone.initialAngle;
                 return {
@@ -189,8 +209,6 @@
                         }
                     }
 
-                    const vibration = (!isPaused && count > 1) ? (Math.random() - 0.5) * count * 4 : 0;
-
                     let scaleX = 1;
                     let scaleY = 1;
                     if (zone.impactPhase > 0) {
@@ -200,7 +218,7 @@
                     }
 
                     ctx.save();
-                    ctx.translate(pos.x + vibration, pos.y + vibration);
+                    ctx.translate(pos.x, pos.y);
                     ctx.scale(scaleX, scaleY);
                     ctx.beginPath();
                     ctx.arc(0, 0, this.zoneRadius, 0, 2 * Math.PI);
@@ -212,39 +230,18 @@
                 });
 
                 this.nodes.forEach((node) => {
-                    let x, y, isStretched = false, angleToTarget = 0;
+                    const pos = currentPositions[node.isMoving ? -1 : node.currentZoneIndex] || {x:0, y:0};
+                    let x = pos.x, y = pos.y;
                     if (node.isMoving) {
                         const start = currentPositions[node.currentZoneIndex];
                         const end = currentPositions[node.targetZoneIndex];
                         x = start.x + (end.x - start.x) * node.progress;
                         y = start.y + (end.y - start.y) * node.progress;
-                        isStretched = true;
-                        angleToTarget = Math.atan2(end.y - start.y, end.x - start.x);
-                    } else {
-                        const pos = currentPositions[node.currentZoneIndex];
-                        const group = nodeGroups[node.currentZoneIndex];
-                        const nodeIdx = group.indexOf(node);
-                        const count = group.length;
-
-                        if (count > 1) {
-                            const angle = (nodeIdx / count) * 2 * Math.PI;
-                            x = pos.x + (this.zoneRadius * 0.5) * Math.cos(angle);
-                            y = pos.y + (this.zoneRadius * 0.5) * Math.sin(angle);
-                        } else {
-                            x = pos.x; y = pos.y;
-                        }
                     }
-
+                    
                     ctx.beginPath();
-                    if (isStretched) {
-                        ctx.ellipse(x, y, this.awarenessRadius * 1.5, this.awarenessRadius, angleToTarget, 0, 2 * Math.PI);
-                        ctx.fillStyle = '#f1c40f'; // Yellow
-                        ctx.strokeStyle = '#a1880a'; // Darker gold
-                    } else {
-                        ctx.arc(x, y, this.awarenessRadius, 0, 2 * Math.PI);
-                        ctx.fillStyle = '#2ecc71'; // Green
-                        ctx.strokeStyle = '#1e8449'; // Darker green
-                    }
+                    ctx.arc(x, y, this.awarenessRadius, 0, 2 * Math.PI);
+                    ctx.fillStyle = this.zones[node.currentZoneIndex] ? TYPE_COLORS[this.zones[node.currentZoneIndex].type] : '#fff';
                     ctx.lineWidth = 4;
                     ctx.stroke();
                     ctx.fill();
@@ -269,6 +266,10 @@
             const z1 = consciousnesses[0].getActiveZone();
             const z2 = consciousnesses[1].getActiveZone();
             
+            // Debug Memory UI
+            memUI1.innerText = `Memory: [${consciousnesses[0].memory[0]}, ${consciousnesses[0].memory[1]}]`;
+            memUI2.innerText = `Memory: [${consciousnesses[1].memory[0]}, ${consciousnesses[1].memory[1]}]`;
+            
             if (z1 === null || z2 === null) {
                 currentUI.innerText = "Status: Calculating...";
                 currentUI.style.color = "#ccc";
@@ -276,6 +277,9 @@
             }
             const compatible = (z1.type === z2.type);
             
+            consciousnesses[0].learn(z2.type, compatible);
+            consciousnesses[1].learn(z1.type, compatible);
+
             currentUI.innerText = compatible ? "Status: Compatible" : "Status: Incompatible";
             currentUI.style.color = compatible ? COLOR_COMPATIBLE : COLOR_INCOMPATIBLE;
             
