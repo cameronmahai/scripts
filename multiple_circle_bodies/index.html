@@ -189,6 +189,8 @@
                         }
                     }
 
+                    const vibration = (!isPaused && count > 1) ? (Math.random() - 0.5) * count * 4 : 0;
+
                     let scaleX = 1;
                     let scaleY = 1;
                     if (zone.impactPhase > 0) {
@@ -198,7 +200,7 @@
                     }
 
                     ctx.save();
-                    ctx.translate(pos.x, pos.y);
+                    ctx.translate(pos.x + vibration, pos.y + vibration);
                     ctx.scale(scaleX, scaleY);
                     ctx.beginPath();
                     ctx.arc(0, 0, this.zoneRadius, 0, 2 * Math.PI);
@@ -221,7 +223,16 @@
                     } else {
                         const pos = currentPositions[node.currentZoneIndex];
                         const group = nodeGroups[node.currentZoneIndex];
-                        x = pos.x; y = pos.y;
+                        const nodeIdx = group.indexOf(node);
+                        const count = group.length;
+
+                        if (count > 1) {
+                            const angle = (nodeIdx / count) * 2 * Math.PI;
+                            x = pos.x + (this.zoneRadius * 0.5) * Math.cos(angle);
+                            y = pos.y + (this.zoneRadius * 0.5) * Math.sin(angle);
+                        } else {
+                            x = pos.x; y = pos.y;
+                        }
                     }
 
                     ctx.beginPath();
