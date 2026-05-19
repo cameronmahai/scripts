@@ -19,6 +19,19 @@
         }
         #controls1 { left: 10px; }
         #controls2 { right: 10px; }
+        #compatibility-ui {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 20px;
+            font-family: sans-serif;
+            font-size: 1.2em;
+            z-index: 10;
+        }
     </style>
 </head>
 <body>
@@ -37,10 +50,12 @@
         <label>Pulse: <input type="range" id="pulseSpeed2" min="1" max="20" value="5"></label>
     </div>
     <button id="pauseBtn" style="position:absolute; top:10px; left:50%; z-index:10;">Pause</button>
+    <div id="compatibility-ui">Status: Checking...</div>
     <canvas id="canvas"></canvas>
     <script>
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
+        const compUI = document.getElementById('compatibility-ui');
         let width, height;
         let isPaused = false;
         let lastTime = performance.now();
@@ -62,18 +77,26 @@
                 this.id = id;
                 this.centerX = centerX;
                 this.centerY = centerY;
-                this.radius = 120; // Smaller radius to fit two
+                this.radius = 120;
                 this.zoneRadius = 30;
                 this.awarenessRadius = 10;
                 this.numZones = 7;
                 this.zones = [];
                 for (let i = 0; i < this.numZones; i++) {
-                    this.zones.push({ initialAngle: (i / this.numZones) * 2 * Math.PI, impactPhase: 0, impactTime: 0, ripples: [] });
+                    // Assign a random 'type' to each zone (0-6)
+                    this.zones.push({ 
+                        initialAngle: (i / this.numZones) * 2 * Math.PI, 
+                        impactPhase: 0, 
+                        impactTime: 0, 
+                        ripples: [],
+                        type: Math.floor(Math.random() * this.numZones)
+                    });
                 }
                 this.nodes = [this.createNode()];
                 this.totalRotation = 0;
             }
 
+            // ... (createNode, getWeightedNextZone, getZonePosition methods same as before)
             createNode() {
                 const current = Math.floor(Math.random() * this.numZones);
                 return {
@@ -86,14 +109,12 @@
                     pauseDuration: Math.random() * 3500 + 500
                 };
             }
-
             getWeightedNextZone(current) {
                 const r = Math.random();
                 if (r < 0.7) return (current + 1) % this.numZones;
                 if (r < 0.9) return (current - 1 + this.numZones) % this.numZones;
                 return Math.floor(Math.random() * this.numZones);
             }
-
             getZonePosition(zone, rotation) {
                 const angle = zone.initialAngle + rotation;
                 return {
@@ -102,7 +123,7 @@
                 };
             }
 
-            update(dt, currentTime, pulseSpeed) {
+            update(dt, currentTime) {
                 const numNodes = parseInt(document.getElementById('numNodes' + this.id).value);
                 while (this.nodes.length < numNodes) this.nodes.push(this.createNode());
                 while (this.nodes.length > numNodes) this.nodes.pop();
@@ -162,7 +183,6 @@
                     const pulseIntensity = 1 + count * 0.3;
                     const finalScale = pulse * pulseIntensity;
 
-                    // Elliptical deformation
                     let scaleX = 1;
                     let scaleY = 1;
                     if (zone.impactPhase > 0) {
@@ -221,12 +241,36 @@
                     ctx.fill();
                 });
             }
+
+            // Helper to get active zone type
+            getActiveZoneType() {
+                // Return type of the first zone occupied, or null
+                for (let i = 0; i < this.numZones; i++) {
+                    const nodesInZone = this.nodes.filter(n => !n.isMoving && n.currentZoneIndex === i);
+                    if (nodesInZone.length > 0) return this.zones[i].type;
+                }
+                return null;
+            }
         }
 
         const consciousnesses = [
             new Consciousness(1, width / 4, height / 2),
             new Consciousness(2, 3 * width / 4, height / 2)
         ];
+
+        function checkCompatibility() {
+            const type1 = consciousnesses[0].getActiveZoneType();
+            const type2 = consciousnesses[1].getActiveZoneType();
+            
+            if (type1 === null || type2 === null) {
+                compUI.innerText = "Status: Calculating...";
+                return;
+            }
+            // 50/50 compatibility: simple modulo check
+            const compatible = (type1 + type2) % 2 === 0;
+            compUI.innerText = compatible ? "Status: Compatible" : "Status: Incompatible";
+            compUI.style.color = compatible ? "#2ecc71" : "#ff6b6b";
+        }
 
         let runningTime = 0;
         function animate(currentTime) {
@@ -236,6 +280,7 @@
             if (!isPaused) {
                 runningTime += dt;
                 consciousnesses.forEach(c => c.update(dt, currentTime));
+                checkCompatibility();
             }
             ctx.clearRect(0, 0, width, height);
             consciousnesses.forEach(c => c.draw(runningTime));
