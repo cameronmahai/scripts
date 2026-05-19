@@ -89,27 +89,16 @@
             };
         }
 
-        // Draw Membrane Effect (Multiple ripples)
+        // Draw Membrane Effect (Concentric ripples)
         function drawMembraneCircle(ctx, x, y, radius, ripples) {
-            ctx.beginPath();
-            const segments = 64;
-            for (let i = 0; i <= segments; i++) {
-                const angle = (i / segments) * 2 * Math.PI;
-                let totalDeformation = 0;
-                // Sum all active ripples
-                ripples.forEach(r => {
-                    // Ripple dissipates and moves outwards
-                    const wave = Math.sin(angle * 4 + r.age * 0.2) * r.amplitude;
-                    totalDeformation += wave;
-                });
-                
-                const r = radius + totalDeformation;
-                const px = x + r * Math.cos(angle);
-                const py = y + r * Math.sin(angle);
-                if (i === 0) ctx.moveTo(px, py);
-                else ctx.lineTo(px, py);
-            }
-            ctx.closePath();
+            ripples.forEach(r => {
+                ctx.beginPath();
+                // Draw ripple as an expanding ellipse
+                ctx.ellipse(x, y, radius + r.size, radius + r.size * 0.5, 0, 0, 2 * Math.PI);
+                ctx.strokeStyle = `rgba(255, 255, 255, ${r.opacity})`;
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            });
         }
 
         function draw(rotation, time) {
@@ -134,26 +123,29 @@
                 const count = nodes.length;
                 const zone = zones[i];
                 
-                // Update ripples (decay)
+                // Update ripples (decay and expand)
                 if (!isPaused) {
                     zone.ripples = zone.ripples.filter(r => {
-                        r.age += 0.5;
-                        r.amplitude *= 0.92;
-                        return r.amplitude > 0.1;
+                        r.size += 1.5;
+                        r.opacity -= 0.02;
+                        return r.opacity > 0;
                     });
                 }
 
-                // Vibration (agitation) - Only when not paused
                 const vibration = (!isPaused && count > 1) ? (Math.random() - 0.5) * count * 4 : 0;
 
                 const pulseIntensity = 1 + count * 0.3;
                 const finalScale = pulse * pulseIntensity;
 
-                drawMembraneCircle(ctx, pos.x + vibration, pos.y + vibration, zoneRadius * finalScale, zone.ripples);
-                
+                // Draw base circle
+                ctx.beginPath();
+                ctx.arc(pos.x + vibration, pos.y + vibration, zoneRadius * finalScale, 0, 2 * Math.PI);
                 ctx.strokeStyle = count >= 3 ? '#ff6b6b' : count === 2 ? '#f1c40f' : count === 1 ? '#2ecc71' : '#ecf0f1';
                 ctx.lineWidth = 3 * finalScale;
                 ctx.stroke();
+
+                // Draw ripples over the circle
+                drawMembraneCircle(ctx, pos.x + vibration, pos.y + vibration, zoneRadius * finalScale, zone.ripples);
             });
 
             awarenessNodes.forEach((node) => {
@@ -220,8 +212,11 @@
                         node.progress += dt / speed;
                         if (node.progress >= 1) {
                             node.progress = 0;
-                            // Add ripple upon arrival
-                            zones[node.targetZoneIndex].ripples.push({ amplitude: 10, age: 0 });
+                            // Trigger multiple ripples upon arrival
+                            const zone = zones[node.targetZoneIndex];
+                            zone.ripples.push({ size: 0, opacity: 1 });
+                            setTimeout(() => zone.ripples.push({ size: 0, opacity: 0.7 }), 100);
+                            setTimeout(() => zone.ripples.push({ size: 0, opacity: 0.4 }), 200);
                             
                             node.currentZoneIndex = node.targetZoneIndex;
                             node.targetZoneIndex = getWeightedNextZone(node.currentZoneIndex);
