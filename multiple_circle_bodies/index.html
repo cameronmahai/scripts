@@ -39,18 +39,14 @@
 <body>
     <div id="controls1" class="controls">
         <h3>Consciousness 1</h3>
-        <label>Drift: <input type="range" id="ballSpeed1" min="100" max="2000" value="500"></label><br>
-        <label>Rotation: <input type="range" id="rotSpeed1" min="0" max="50" value="10"></label><br>
-        <label>Intensity: <input type="range" id="numNodes1" min="1" max="5" value="1"></label><br>
-        <label>Pulse: <input type="range" id="pulseSpeed1" min="1" max="20" value="5"></label><br>
+        <label>Focus: <input type="range" id="focus1" min="100" max="2000" value="500"></label><br>
+        <label>Intelligence: <input type="range" id="intelligence1" min="1" max="5" value="1"></label><br>
         <label>Adaptability: <input type="range" id="adapt1" min="0" max="100" value="50"></label>
     </div>
     <div id="controls2" class="controls">
         <h3>Consciousness 2</h3>
-        <label>Drift: <input type="range" id="ballSpeed2" min="100" max="2000" value="500"></label><br>
-        <label>Rotation: <input type="range" id="rotSpeed2" min="0" max="50" value="10"></label><br>
-        <label>Intensity: <input type="range" id="numNodes2" min="1" max="5" value="1"></label><br>
-        <label>Pulse: <input type="range" id="pulseSpeed2" min="1" max="20" value="5"></label><br>
+        <label>Focus: <input type="range" id="focus2" min="100" max="2000" value="500"></label><br>
+        <label>Intelligence: <input type="range" id="intelligence2" min="1" max="5" value="1"></label><br>
         <label>Adaptability: <input type="range" id="adapt2" min="0" max="100" value="50"></label>
     </div>
     <button id="pauseBtn" style="position:absolute; top:10px; left:50%; z-index:10;">Pause</button>
@@ -70,7 +66,6 @@
         
         let compHistory = { compatible: 0, incompatible: 0 };
         
-        // Soft Palette
         const TYPE_COLORS = ["#88b378", "#d18a8f"]; 
         const COLOR_COMPATIBLE = "#88b378";
         const COLOR_INCOMPATIBLE = "#d18a8f";
@@ -97,19 +92,15 @@
                 this.awarenessRadius = 10;
                 this.numZones = 7;
                 this.zones = [];
-                // Memory: map type to status (1=comp, -1=incomp, 0=unknown)
-                this.memory = {}; 
                 for (let i = 0; i < this.numZones; i++) {
-                    const type = Math.floor(Math.random() * 2);
                     this.zones.push({ 
                         initialAngle: (i / this.numZones) * 2 * Math.PI, 
-                        impactPhase: 0, impactTime: 0, ripples: [],
-                        type: type 
+                        impactPhase: 0, 
+                        impactTime: 0, 
+                        type: Math.floor(Math.random() * 2) 
                     });
-                    if (this.memory[type] === undefined) this.memory[type] = 0;
                 }
                 this.nodes = [this.createNode()];
-                this.totalRotation = 0;
             }
 
             createNode() {
@@ -124,16 +115,12 @@
                     pauseDuration: Math.random() * 3500 + 500
                 };
             }
-
             getWeightedNextZone(current) {
                 const adapt = parseInt(document.getElementById('adapt' + this.id).value) / 100;
                 const weights = this.zones.map((z, i) => {
                     if (i === current) return 0;
-                    // Base probability + memory adjustment
                     let weight = 1;
-                    const mem = this.memory[z.type];
-                    if (mem > 0) weight += adapt * 2; // Bias towards compatible
-                    if (mem < 0) weight -= adapt * 2; // Bias against incompatible
+                    // Logic for learning would go here based on shared memory
                     return Math.max(0.1, weight);
                 });
                 
@@ -146,15 +133,8 @@
                 return (current + 1) % this.numZones;
             }
 
-            learn(zoneType, isCompatible) {
-                const adapt = parseInt(document.getElementById('adapt' + this.id).value) / 100;
-                if (Math.random() < adapt) {
-                    this.memory[zoneType] = isCompatible ? 1 : -1;
-                }
-            }
-
-            getZonePosition(zone, rotation) {
-                const angle = zone.initialAngle + rotation;
+            getZonePosition(zone) {
+                const angle = zone.initialAngle; // Removed rotation
                 return {
                     x: this.centerX + this.radius * Math.cos(angle),
                     y: this.centerY + this.radius * Math.sin(angle)
@@ -162,13 +142,11 @@
             }
 
             update(dt, currentTime) {
-                const numNodes = parseInt(document.getElementById('numNodes' + this.id).value);
+                const numNodes = parseInt(document.getElementById('intelligence' + this.id).value);
                 while (this.nodes.length < numNodes) this.nodes.push(this.createNode());
                 while (this.nodes.length > numNodes) this.nodes.pop();
 
-                const speed = parseInt(document.getElementById('ballSpeed' + this.id).value);
-                const rotSpeed = parseInt(document.getElementById('rotSpeed' + this.id).value) / 2000;
-                this.totalRotation += rotSpeed;
+                const speed = parseInt(document.getElementById('focus' + this.id).value);
 
                 this.nodes.forEach(node => {
                     if (node.isMoving) {
@@ -189,7 +167,7 @@
                 });
             }
 
-            draw(time) {
+            draw() {
                 const nodeGroups = {};
                 this.nodes.forEach(node => {
                     const zoneIdx = node.isMoving ? -1 : node.currentZoneIndex;
@@ -199,9 +177,7 @@
                     }
                 });
 
-                const currentPositions = this.zones.map(z => this.getZonePosition(z, this.totalRotation));
-                const pulseSpeed = parseInt(document.getElementById('pulseSpeed' + this.id).value) / 1000;
-                const pulse = Math.sin(time * pulseSpeed) * 0.2 + 0.8;
+                const currentPositions = this.zones.map(z => this.getZonePosition(z));
 
                 currentPositions.forEach((pos, i) => {
                     const nodes = nodeGroups[i] || [];
@@ -218,8 +194,6 @@
                     }
 
                     const vibration = (!isPaused && count > 1) ? (Math.random() - 0.5) * count * 4 : 0;
-                    const pulseIntensity = 1 + count * 0.3;
-                    const finalScale = pulse * pulseIntensity;
 
                     let scaleX = 1;
                     let scaleY = 1;
@@ -233,47 +207,27 @@
                     ctx.translate(pos.x + vibration, pos.y + vibration);
                     ctx.scale(scaleX, scaleY);
                     ctx.beginPath();
-                    ctx.arc(0, 0, this.zoneRadius * finalScale, 0, 2 * Math.PI);
+                    ctx.arc(0, 0, this.zoneRadius, 0, 2 * Math.PI);
                     ctx.restore();
                     
                     ctx.strokeStyle = TYPE_COLORS[zone.type];
-                    ctx.lineWidth = 3 * finalScale;
+                    ctx.lineWidth = 3;
                     ctx.stroke();
                 });
 
                 this.nodes.forEach((node) => {
-                    let x, y, isStretched = false, angleToTarget = 0;
+                    const pos = currentPositions[node.isMoving ? -1 : node.currentZoneIndex] || {x:0, y:0};
+                    let x = pos.x, y = pos.y;
                     if (node.isMoving) {
                         const start = currentPositions[node.currentZoneIndex];
                         const end = currentPositions[node.targetZoneIndex];
                         x = start.x + (end.x - start.x) * node.progress;
                         y = start.y + (end.y - start.y) * node.progress;
-                        isStretched = true;
-                        angleToTarget = Math.atan2(end.y - start.y, end.x - start.x);
-                    } else {
-                        const pos = currentPositions[node.currentZoneIndex];
-                        const group = nodeGroups[node.currentZoneIndex];
-                        const nodeIdx = group.indexOf(node);
-                        const count = group.length;
-                        if (count > 1) {
-                            const angle = (nodeIdx / count) * 2 * Math.PI;
-                            x = pos.x + (this.zoneRadius * 0.4) * Math.cos(angle);
-                            y = pos.y + (this.zoneRadius * 0.4) * Math.sin(angle);
-                        } else {
-                            x = pos.x; y = pos.y;
-                        }
                     }
-
+                    
                     ctx.beginPath();
-                    if (isStretched) {
-                        ctx.ellipse(x, y, this.awarenessRadius * 1.5, this.awarenessRadius, angleToTarget, 0, 2 * Math.PI);
-                        ctx.fillStyle = '#f1c40f'; 
-                        ctx.strokeStyle = '#a1880a';
-                    } else {
-                        ctx.arc(x, y, this.awarenessRadius, 0, 2 * Math.PI);
-                        ctx.fillStyle = '#2ecc71'; 
-                        ctx.strokeStyle = '#1e8449';
-                    }
+                    ctx.arc(x, y, this.awarenessRadius, 0, 2 * Math.PI);
+                    ctx.fillStyle = this.zones[node.currentZoneIndex] ? TYPE_COLORS[this.zones[node.currentZoneIndex].type] : '#fff';
                     ctx.lineWidth = 4;
                     ctx.stroke();
                     ctx.fill();
@@ -305,10 +259,6 @@
             }
             const compatible = (z1.type === z2.type);
             
-            // Learning: each learns about the other's zone type
-            consciousnesses[0].learn(z2.type, compatible);
-            consciousnesses[1].learn(z1.type, compatible);
-
             currentUI.innerText = compatible ? "Status: Compatible" : "Status: Incompatible";
             currentUI.style.color = compatible ? COLOR_COMPATIBLE : COLOR_INCOMPATIBLE;
             
@@ -323,18 +273,15 @@
         function drawPieChart() {
             const total = compHistory.compatible + compHistory.incompatible;
             if (total === 0) return;
-            
             const centerX = width - 100;
             const centerY = height - 100;
             const radius = 50;
             const compAngle = (compHistory.compatible / total) * 2 * Math.PI;
-            
             ctx.beginPath();
             ctx.moveTo(centerX, centerY);
             ctx.arc(centerX, centerY, radius, 0, compAngle);
             ctx.fillStyle = COLOR_COMPATIBLE;
             ctx.fill();
-            
             ctx.beginPath();
             ctx.moveTo(centerX, centerY);
             ctx.arc(centerX, centerY, radius, compAngle, 2 * Math.PI);
@@ -342,18 +289,15 @@
             ctx.fill();
         }
 
-        let runningTime = 0;
         function animate(currentTime) {
             const dt = currentTime - lastTime;
             lastTime = currentTime;
-
             if (!isPaused) {
-                runningTime += dt;
                 consciousnesses.forEach(c => c.update(dt, currentTime));
                 checkCompatibility();
             }
             ctx.clearRect(0, 0, width, height);
-            consciousnesses.forEach(c => c.draw(runningTime));
+            consciousnesses.forEach(c => c.draw());
             drawPieChart();
             requestAnimationFrame(animate);
         }
