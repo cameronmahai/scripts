@@ -42,14 +42,16 @@
         <label>Drift: <input type="range" id="ballSpeed1" min="100" max="2000" value="500"></label><br>
         <label>Rotation: <input type="range" id="rotSpeed1" min="0" max="50" value="10"></label><br>
         <label>Intensity: <input type="range" id="numNodes1" min="1" max="5" value="1"></label><br>
-        <label>Pulse: <input type="range" id="pulseSpeed1" min="1" max="20" value="5"></label>
+        <label>Pulse: <input type="range" id="pulseSpeed1" min="1" max="20" value="5"></label><br>
+        <label>Adaptability: <input type="range" id="adapt1" min="0" max="100" value="50"></label>
     </div>
     <div id="controls2" class="controls">
         <h3>Consciousness 2</h3>
         <label>Drift: <input type="range" id="ballSpeed2" min="100" max="2000" value="500"></label><br>
         <label>Rotation: <input type="range" id="rotSpeed2" min="0" max="50" value="10"></label><br>
         <label>Intensity: <input type="range" id="numNodes2" min="1" max="5" value="1"></label><br>
-        <label>Pulse: <input type="range" id="pulseSpeed2" min="1" max="20" value="5"></label>
+        <label>Pulse: <input type="range" id="pulseSpeed2" min="1" max="20" value="5"></label><br>
+        <label>Adaptability: <input type="range" id="adapt2" min="0" max="100" value="50"></label>
     </div>
     <button id="pauseBtn" style="position:absolute; top:10px; left:50%; z-index:10;">Pause</button>
     <div id="compatibility-ui">
@@ -68,7 +70,7 @@
         
         let compHistory = { compatible: 0, incompatible: 0 };
         
-        // Soft Palette for Types
+        // Soft Palette
         const TYPE_COLORS = ["#88b378", "#d18a8f"]; 
         const COLOR_COMPATIBLE = "#88b378";
         const COLOR_INCOMPATIBLE = "#d18a8f";
@@ -95,14 +97,16 @@
                 this.awarenessRadius = 10;
                 this.numZones = 7;
                 this.zones = [];
+                // Memory: map type to status (1=comp, -1=incomp, 0=unknown)
+                this.memory = {}; 
                 for (let i = 0; i < this.numZones; i++) {
+                    const type = Math.floor(Math.random() * 2);
                     this.zones.push({ 
                         initialAngle: (i / this.numZones) * 2 * Math.PI, 
-                        impactPhase: 0, 
-                        impactTime: 0, 
-                        ripples: [],
-                        type: Math.floor(Math.random() * 2) 
+                        impactPhase: 0, impactTime: 0, ripples: [],
+                        type: type 
                     });
+                    if (this.memory[type] === undefined) this.memory[type] = 0;
                 }
                 this.nodes = [this.createNode()];
                 this.totalRotation = 0;
@@ -120,12 +124,35 @@
                     pauseDuration: Math.random() * 3500 + 500
                 };
             }
+
             getWeightedNextZone(current) {
-                const r = Math.random();
-                if (r < 0.7) return (current + 1) % this.numZones;
-                if (r < 0.9) return (current - 1 + this.numZones) % this.numZones;
-                return Math.floor(Math.random() * this.numZones);
+                const adapt = parseInt(document.getElementById('adapt' + this.id).value) / 100;
+                const weights = this.zones.map((z, i) => {
+                    if (i === current) return 0;
+                    // Base probability + memory adjustment
+                    let weight = 1;
+                    const mem = this.memory[z.type];
+                    if (mem > 0) weight += adapt * 2; // Bias towards compatible
+                    if (mem < 0) weight -= adapt * 2; // Bias against incompatible
+                    return Math.max(0.1, weight);
+                });
+                
+                const totalWeight = weights.reduce((a, b) => a + b, 0);
+                let r = Math.random() * totalWeight;
+                for (let i = 0; i < weights.length; i++) {
+                    r -= weights[i];
+                    if (r <= 0) return i;
+                }
+                return (current + 1) % this.numZones;
             }
+
+            learn(zoneType, isCompatible) {
+                const adapt = parseInt(document.getElementById('adapt' + this.id).value) / 100;
+                if (Math.random() < adapt) {
+                    this.memory[zoneType] = isCompatible ? 1 : -1;
+                }
+            }
+
             getZonePosition(zone, rotation) {
                 const angle = zone.initialAngle + rotation;
                 return {
@@ -240,12 +267,12 @@
                     ctx.beginPath();
                     if (isStretched) {
                         ctx.ellipse(x, y, this.awarenessRadius * 1.5, this.awarenessRadius, angleToTarget, 0, 2 * Math.PI);
-                        ctx.fillStyle = '#f1c40f'; // Yellow
-                        ctx.strokeStyle = '#a1880a'; // Darker gold
+                        ctx.fillStyle = '#f1c40f'; 
+                        ctx.strokeStyle = '#a1880a';
                     } else {
                         ctx.arc(x, y, this.awarenessRadius, 0, 2 * Math.PI);
-                        ctx.fillStyle = '#2ecc71'; // Green
-                        ctx.strokeStyle = '#1e8449'; // Darker green
+                        ctx.fillStyle = '#2ecc71'; 
+                        ctx.strokeStyle = '#1e8449';
                     }
                     ctx.lineWidth = 4;
                     ctx.stroke();
@@ -253,10 +280,10 @@
                 });
             }
 
-            getActiveZoneType() {
+            getActiveZone() {
                 for (let i = 0; i < this.numZones; i++) {
                     const nodesInZone = this.nodes.filter(n => !n.isMoving && n.currentZoneIndex === i);
-                    if (nodesInZone.length > 0) return this.zones[i].type;
+                    if (nodesInZone.length > 0) return this.zones[i];
                 }
                 return null;
             }
@@ -268,15 +295,20 @@
         ];
 
         function checkCompatibility() {
-            const type1 = consciousnesses[0].getActiveZoneType();
-            const type2 = consciousnesses[1].getActiveZoneType();
+            const z1 = consciousnesses[0].getActiveZone();
+            const z2 = consciousnesses[1].getActiveZone();
             
-            if (type1 === null || type2 === null) {
+            if (z1 === null || z2 === null) {
                 currentUI.innerText = "Status: Calculating...";
                 currentUI.style.color = "#ccc";
                 return;
             }
-            const compatible = (type1 === type2);
+            const compatible = (z1.type === z2.type);
+            
+            // Learning: each learns about the other's zone type
+            consciousnesses[0].learn(z2.type, compatible);
+            consciousnesses[1].learn(z1.type, compatible);
+
             currentUI.innerText = compatible ? "Status: Compatible" : "Status: Incompatible";
             currentUI.style.color = compatible ? COLOR_COMPATIBLE : COLOR_INCOMPATIBLE;
             
