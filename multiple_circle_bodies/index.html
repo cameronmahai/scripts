@@ -19,6 +19,7 @@
         }
         #controls1 { left: 10px; }
         #controls2 { right: 10px; }
+        #controls-global { left: 40%; top: 10px; }
         #compatibility-ui {
             position: absolute;
             bottom: 20px;
@@ -45,6 +46,11 @@
         <label>Adaptability: <input type="range" id="adapt1" min="0" max="100" value="50"></label>
         <div id="memory1" class="memory-debug">Memory: [0, 0]</div>
     </div>
+    <div id="controls-global" class="controls">
+        <label>Compatibility Bias: <input type="range" id="compPool" min="0" max="100" value="50"></label><br>
+        <button id="restartBtn">Restart Simulation</button>
+        <button id="pauseBtn">Pause</button>
+    </div>
     <div id="controls2" class="controls">
         <h3>Consciousness 2</h3>
         <label>Focus: <input type="range" id="focus2" min="100" max="2000" value="500"></label><br>
@@ -52,7 +58,6 @@
         <label>Adaptability: <input type="range" id="adapt2" min="0" max="100" value="50"></label>
         <div id="memory2" class="memory-debug">Memory: [0, 0]</div>
     </div>
-    <button id="pauseBtn" style="position:absolute; top:10px; left:50%; z-index:10;">Pause</button>
     <div id="compatibility-ui">
         <div id="current-status">Status: Calculating...</div>
         <div id="overall-status">Overall: Calculating...</div>
@@ -68,7 +73,7 @@
         let width, height;
         let isPaused = false;
         let lastTime = performance.now();
-        
+        let consciousnesses = [];
         let compHistory = { compatible: 0, incompatible: 0 };
         
         const TYPE_COLORS = ["#88b378", "#d18a8f"]; 
@@ -80,6 +85,8 @@
             e.target.innerText = isPaused ? 'Resume' : 'Pause';
         });
 
+        document.getElementById('restartBtn').addEventListener('click', initSimulation);
+
         function resize() {
             width = canvas.width = window.innerWidth;
             height = canvas.height = window.innerHeight;
@@ -88,7 +95,7 @@
         resize();
 
         class Consciousness {
-            constructor(id, centerX, centerY) {
+            constructor(id, centerX, centerY, zoneTypes) {
                 this.id = id;
                 this.centerX = centerX;
                 this.centerY = centerY;
@@ -102,7 +109,7 @@
                     this.zones.push({ 
                         initialAngle: (i / this.numZones) * 2 * Math.PI, 
                         impactPhase: 0, impactTime: 0, 
-                        type: Math.floor(Math.random() * 2) 
+                        type: zoneTypes[i]
                     });
                 }
                 this.nodes = [this.createNode()];
@@ -126,12 +133,10 @@
                     if (i === current) return 0;
                     let weight = 1;
                     const mem = this.memory[z.type];
-                    // Stronger bias
                     if (mem > 0) weight = 1 + (adapt * 50); 
                     else if (mem < 0) weight = Math.max(0.01, 1 - (adapt * 0.99));
                     return weight;
                 });
-                
                 const totalWeight = weights.reduce((a, b) => a + b, 0);
                 let r = Math.random() * totalWeight;
                 for (let i = 0; i < weights.length; i++) {
@@ -149,20 +154,14 @@
             }
 
             getZonePosition(zone) {
-                const angle = zone.initialAngle;
-                return {
-                    x: this.centerX + this.radius * Math.cos(angle),
-                    y: this.centerY + this.radius * Math.sin(angle)
-                };
+                return { x: this.centerX + this.radius * Math.cos(zone.initialAngle), y: this.centerY + this.radius * Math.sin(zone.initialAngle) };
             }
 
             update(dt, currentTime) {
                 const numNodes = parseInt(document.getElementById('intelligence' + this.id).value);
                 while (this.nodes.length < numNodes) this.nodes.push(this.createNode());
                 while (this.nodes.length > numNodes) this.nodes.pop();
-
                 const speed = parseInt(document.getElementById('focus' + this.id).value);
-
                 this.nodes.forEach(node => {
                     if (node.isMoving) {
                         node.progress += dt / speed;
@@ -198,31 +197,21 @@
                     const nodes = nodeGroups[i] || [];
                     const count = nodes.length;
                     const zone = this.zones[i];
-                    
                     if (!isPaused && zone.impactPhase > 0) {
                         zone.impactTime += 16.6; 
-                        if (zone.impactTime >= 400) {
-                            zone.impactPhase++;
-                            zone.impactTime = 0;
-                            if (zone.impactPhase > 3) zone.impactPhase = 0;
-                        }
+                        if (zone.impactTime >= 400) { zone.impactPhase++; zone.impactTime = 0; if (zone.impactPhase > 3) zone.impactPhase = 0; }
                     }
-
-                    let scaleX = 1;
-                    let scaleY = 1;
+                    let scaleX = 1, scaleY = 1;
                     if (zone.impactPhase > 0) {
                         const wobble = Math.sin(zone.impactTime * 0.03) * (0.4 / zone.impactPhase);
-                        scaleX = 1 + wobble;
-                        scaleY = 1 - wobble;
+                        scaleX = 1 + wobble; scaleY = 1 - wobble;
                     }
-
                     ctx.save();
                     ctx.translate(pos.x, pos.y);
                     ctx.scale(scaleX, scaleY);
                     ctx.beginPath();
                     ctx.arc(0, 0, this.zoneRadius, 0, 2 * Math.PI);
                     ctx.restore();
-                    
                     ctx.strokeStyle = TYPE_COLORS[zone.type];
                     ctx.lineWidth = 3;
                     ctx.stroke();
@@ -237,7 +226,6 @@
                         x = start.x + (end.x - start.x) * node.progress;
                         y = start.y + (end.y - start.y) * node.progress;
                     }
-                    
                     ctx.beginPath();
                     ctx.arc(x, y, this.awarenessRadius, 0, 2 * Math.PI);
                     ctx.fillStyle = this.zones[node.currentZoneIndex] ? TYPE_COLORS[this.zones[node.currentZoneIndex].type] : '#fff';
@@ -256,33 +244,34 @@
             }
         }
 
-        const consciousnesses = [
-            new Consciousness(1, width / 4, height / 2),
-            new Consciousness(2, 3 * width / 4, height / 2)
-        ];
+        function initSimulation() {
+            const compBias = parseInt(document.getElementById('compPool').value) / 100;
+            const zoneTypes1 = Array.from({length: 7}, () => Math.floor(Math.random() * 2));
+            const zoneTypes2 = zoneTypes1.map(t => Math.random() < compBias ? t : (1 - t));
+            
+            consciousnesses = [
+                new Consciousness(1, width / 4, height / 2, zoneTypes1),
+                new Consciousness(2, 3 * width / 4, height / 2, zoneTypes2)
+            ];
+            compHistory = { compatible: 0, incompatible: 0 };
+        }
 
         function checkCompatibility() {
             const z1 = consciousnesses[0].getActiveZone();
             const z2 = consciousnesses[1].getActiveZone();
-            
             memUI1.innerText = `Memory: [${consciousnesses[0].memory[0]}, ${consciousnesses[0].memory[1]}]`;
             memUI2.innerText = `Memory: [${consciousnesses[1].memory[0]}, ${consciousnesses[1].memory[1]}]`;
-            
             if (z1 === null || z2 === null) {
                 currentUI.innerText = "Status: Calculating...";
                 currentUI.style.color = "#ccc";
                 return;
             }
             const compatible = (z1.type === z2.type);
-            
             consciousnesses[0].learn(z2.type, compatible);
             consciousnesses[1].learn(z1.type, compatible);
-
             currentUI.innerText = compatible ? "Status: Compatible" : "Status: Incompatible";
             currentUI.style.color = compatible ? COLOR_COMPATIBLE : COLOR_INCOMPATIBLE;
-            
             compHistory[compatible ? 'compatible' : 'incompatible']++;
-
             const total = compHistory.compatible + compHistory.incompatible;
             const overallCompatible = compHistory.compatible >= compHistory.incompatible;
             overallUI.innerText = overallCompatible ? "Overall: Compatible" : "Overall: Incompatible";
@@ -321,6 +310,7 @@
             requestAnimationFrame(animate);
         }
 
+        initSimulation();
         animate(performance.now());
     </script>
 </body>
