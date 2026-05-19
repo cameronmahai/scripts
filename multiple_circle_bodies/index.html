@@ -33,6 +33,7 @@
             z-index: 10;
         }
         #current-status { font-size: 1.2em; font-weight: bold; }
+        #overall-status { font-size: 1em; margin-top: 5px; color: #ccc; }
     </style>
 </head>
 <body>
@@ -53,18 +54,24 @@
     <button id="pauseBtn" style="position:absolute; top:10px; left:50%; z-index:10;">Pause</button>
     <div id="compatibility-ui">
         <div id="current-status">Status: Calculating...</div>
+        <div id="overall-status">Overall: Calculating...</div>
     </div>
     <canvas id="canvas"></canvas>
     <script>
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
         const currentUI = document.getElementById('current-status');
+        const overallUI = document.getElementById('overall-status');
         let width, height;
         let isPaused = false;
         let lastTime = performance.now();
         
+        let compHistory = { compatible: 0, incompatible: 0 };
+        
         // Soft Palette for Types
         const TYPE_COLORS = ["#88b378", "#d18a8f"]; 
+        const COLOR_COMPATIBLE = "#88b378";
+        const COLOR_INCOMPATIBLE = "#d18a8f";
 
         document.getElementById('pauseBtn').addEventListener('click', (e) => {
             isPaused = !isPaused;
@@ -93,7 +100,7 @@
                         initialAngle: (i / this.numZones) * 2 * Math.PI, 
                         impactPhase: 0, 
                         impactTime: 0, 
-                        // Types: 0 or 1
+                        ripples: [],
                         type: Math.floor(Math.random() * 2) 
                     });
                 }
@@ -170,6 +177,8 @@
                 const pulse = Math.sin(time * pulseSpeed) * 0.2 + 0.8;
 
                 currentPositions.forEach((pos, i) => {
+                    const nodes = nodeGroups[i] || [];
+                    const count = nodes.length;
                     const zone = this.zones[i];
                     
                     if (!isPaused && zone.impactPhase > 0) {
@@ -181,7 +190,8 @@
                         }
                     }
 
-                    const pulseIntensity = 1; 
+                    const vibration = (!isPaused && count > 1) ? (Math.random() - 0.5) * count * 4 : 0;
+                    const pulseIntensity = 1 + count * 0.3;
                     const finalScale = pulse * pulseIntensity;
 
                     let scaleX = 1;
@@ -193,7 +203,7 @@
                     }
 
                     ctx.save();
-                    ctx.translate(pos.x, pos.y);
+                    ctx.translate(pos.x + vibration, pos.y + vibration);
                     ctx.scale(scaleX, scaleY);
                     ctx.beginPath();
                     ctx.arc(0, 0, this.zoneRadius * finalScale, 0, 2 * Math.PI);
@@ -205,19 +215,39 @@
                 });
 
                 this.nodes.forEach((node) => {
-                    const pos = currentPositions[node.isMoving ? -1 : node.currentZoneIndex] || {x:0, y:0};
-                    let x = pos.x, y = pos.y;
-                    
+                    let x, y, isStretched = false, angleToTarget = 0;
                     if (node.isMoving) {
                         const start = currentPositions[node.currentZoneIndex];
                         const end = currentPositions[node.targetZoneIndex];
                         x = start.x + (end.x - start.x) * node.progress;
                         y = start.y + (end.y - start.y) * node.progress;
+                        isStretched = true;
+                        angleToTarget = Math.atan2(end.y - start.y, end.x - start.x);
+                    } else {
+                        const pos = currentPositions[node.currentZoneIndex];
+                        const group = nodeGroups[node.currentZoneIndex];
+                        const nodeIdx = group.indexOf(node);
+                        const count = group.length;
+                        if (count > 1) {
+                            const angle = (nodeIdx / count) * 2 * Math.PI;
+                            x = pos.x + (this.zoneRadius * 0.4) * Math.cos(angle);
+                            y = pos.y + (this.zoneRadius * 0.4) * Math.sin(angle);
+                        } else {
+                            x = pos.x; y = pos.y;
+                        }
                     }
-                    
+
                     ctx.beginPath();
-                    ctx.arc(x, y, this.awarenessRadius, 0, 2 * Math.PI);
-                    ctx.fillStyle = this.zones[node.currentZoneIndex] ? TYPE_COLORS[this.zones[node.currentZoneIndex].type] : '#fff';
+                    if (isStretched) {
+                        ctx.ellipse(x, y, this.awarenessRadius * 1.5, this.awarenessRadius, angleToTarget, 0, 2 * Math.PI);
+                        ctx.fillStyle = '#f1c40f'; // Yellow
+                        ctx.strokeStyle = '#a1880a'; // Darker gold
+                    } else {
+                        ctx.arc(x, y, this.awarenessRadius, 0, 2 * Math.PI);
+                        ctx.fillStyle = '#2ecc71'; // Green
+                        ctx.strokeStyle = '#1e8449'; // Darker green
+                    }
+                    ctx.lineWidth = 4;
                     ctx.stroke();
                     ctx.fill();
                 });
@@ -248,7 +278,36 @@
             }
             const compatible = (type1 === type2);
             currentUI.innerText = compatible ? "Status: Compatible" : "Status: Incompatible";
-            currentUI.style.color = compatible ? "#fff" : "#ccc";
+            currentUI.style.color = compatible ? COLOR_COMPATIBLE : COLOR_INCOMPATIBLE;
+            
+            compHistory[compatible ? 'compatible' : 'incompatible']++;
+
+            const total = compHistory.compatible + compHistory.incompatible;
+            const overallCompatible = compHistory.compatible >= compHistory.incompatible;
+            overallUI.innerText = overallCompatible ? "Overall: Compatible" : "Overall: Incompatible";
+            overallUI.style.color = overallCompatible ? COLOR_COMPATIBLE : COLOR_INCOMPATIBLE;
+        }
+
+        function drawPieChart() {
+            const total = compHistory.compatible + compHistory.incompatible;
+            if (total === 0) return;
+            
+            const centerX = width - 100;
+            const centerY = height - 100;
+            const radius = 50;
+            const compAngle = (compHistory.compatible / total) * 2 * Math.PI;
+            
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY);
+            ctx.arc(centerX, centerY, radius, 0, compAngle);
+            ctx.fillStyle = COLOR_COMPATIBLE;
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY);
+            ctx.arc(centerX, centerY, radius, compAngle, 2 * Math.PI);
+            ctx.fillStyle = COLOR_INCOMPATIBLE;
+            ctx.fill();
         }
 
         let runningTime = 0;
@@ -263,6 +322,7 @@
             }
             ctx.clearRect(0, 0, width, height);
             consciousnesses.forEach(c => c.draw(runningTime));
+            drawPieChart();
             requestAnimationFrame(animate);
         }
 
