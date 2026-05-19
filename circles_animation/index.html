@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>7 Circle Animation</title>
+    <title>Inner Mind Animation</title>
     <style>
         body { margin: 0; overflow: hidden; background: #000; }
         canvas { display: block; }
@@ -22,9 +22,9 @@
 </head>
 <body>
     <div id="controls">
-        <label>Ball Speed: <input type="range" id="ballSpeed" min="100" max="2000" value="500"></label><br>
-        <label>Rotation Speed: <input type="range" id="rotSpeed" min="0" max="50" value="10"></label><br>
-        <label>Num Balls: <input type="range" id="numBalls" min="1" max="5" value="1"></label><br>
+        <label>Focus Drift: <input type="range" id="ballSpeed" min="100" max="2000" value="500"></label><br>
+        <label>Rotation: <input type="range" id="rotSpeed" min="0" max="50" value="10"></label><br>
+        <label>Intensities: <input type="range" id="numBalls" min="1" max="5" value="1"></label><br>
         <button id="pauseBtn">Pause</button>
     </div>
     <canvas id="canvas"></canvas>
@@ -46,149 +46,95 @@
         window.addEventListener('resize', resize);
         resize();
 
-        const numCircles = 7;
-        const radius = 150; // Radius of the large circle
-        const circleRadius = 40; // Radius of each hollow circle
-        const ballRadius = 15;
+        const numZones = 7;
+        const radius = 200;
+        const zoneRadius = 40;
+        const awarenessRadius = 15;
 
-        const circles = [];
-        for (let i = 0; i < numCircles; i++) {
-            const angle = (i / numCircles) * 2 * Math.PI;
-            circles.push({
+        const zones = [];
+        for (let i = 0; i < numZones; i++) {
+            const angle = (i / numZones) * 2 * Math.PI;
+            zones.push({
                 initialAngle: angle,
-                reactionProgress: 0,
-                holdingTime: 0
+                basePulse: 0
             });
         }
 
-        let balls = [];
+        let awarenessNodes = [];
 
-        function createBall() {
-            const current = Math.floor(Math.random() * numCircles);
-            let target;
-            do {
-                target = Math.floor(Math.random() * numCircles);
-            } while (target === current);
-            
+        function createNode() {
+            const current = Math.floor(Math.random() * numZones);
             return {
-                currentCircleIndex: current,
-                targetCircleIndex: target,
-                progress: 0, // 0 to 1
+                currentZoneIndex: current,
+                targetZoneIndex: getWeightedNextZone(current),
+                progress: 0,
                 isMoving: false,
                 lastTime: performance.now(),
                 pauseStartTime: performance.now()
             };
         }
 
-        function getCirclePosition(circle, rotation) {
-            const angle = circle.initialAngle + rotation;
+        // Focus Gravity: Weighted Markov Chain
+        function getWeightedNextZone(current) {
+            const r = Math.random();
+            // High probability to move to adjacent zones (drift), low to jump
+            if (r < 0.7) return (current + 1) % numZones;
+            if (r < 0.9) return (current - 1 + numZones) % numZones;
+            return Math.floor(Math.random() * numZones);
+        }
+
+        function getZonePosition(zone, rotation) {
+            const angle = zone.initialAngle + rotation;
             return {
                 x: width / 2 + radius * Math.cos(angle),
                 y: height / 2 + radius * Math.sin(angle)
             };
         }
 
-        function draw(rotation) {
+        function draw(rotation, time) {
             ctx.clearRect(0, 0, width, height);
 
-            // Group balls by circle
-            const ballsOnCircle = {};
-            balls.forEach(ball => {
-                if (!ball.isMoving) {
-                    if (!ballsOnCircle[ball.currentCircleIndex]) {
-                        ballsOnCircle[ball.currentCircleIndex] = [];
-                    }
-                    ballsOnCircle[ball.currentCircleIndex].push(ball);
+            const ballsOnZone = {};
+            awarenessNodes.forEach(node => {
+                if (!node.isMoving) {
+                    if (!ballsOnZone[node.currentZoneIndex]) ballsOnZone[node.currentZoneIndex] = 0;
+                    ballsOnZone[node.currentZoneIndex]++;
                 }
             });
 
-            // Update holding time
-            if (!isPaused) {
-                circles.forEach((circle, index) => {
-                    if (ballsOnCircle[index]) {
-                        circle.holdingTime += 0.01;
-                    } else {
-                        circle.holdingTime = 0;
-                    }
-                });
-            }
+            const currentPositions = zones.map(z => getZonePosition(z, rotation));
 
-            // Recalculate circle positions based on rotation
-            const currentPositions = circles.map(c => getCirclePosition(c, rotation));
+            // Active Awareness: Rhythmic Pulse
+            const heartRate = 0.005;
+            const pulse = Math.sin(time * heartRate) * 0.2 + 0.8;
 
-            // Draw hollow circles
             currentPositions.forEach((pos, i) => {
-                const circle = circles[i];
-                const ballCount = ballsOnCircle[i] ? ballsOnCircle[i].length : 0;
-                
-                // Reaction effect
-                let scale = 1;
-                if (circle.reactionProgress > 0) {
-                    scale = 1 + Math.sin(circle.reactionProgress * Math.PI) * 0.3;
-                    if (!isPaused) {
-                        circle.reactionProgress -= 0.05;
-                        if (circle.reactionProgress < 0) circle.reactionProgress = 0;
-                    }
-                }
-                
-                // Hot Potato
-                scale += circle.holdingTime * 0.3;
+                const count = ballsOnZone[i] || 0;
+                const pulseIntensity = 1 + count * 0.5; // More balls = higher pulse
+                const finalScale = pulse * pulseIntensity;
 
                 ctx.beginPath();
-                ctx.arc(pos.x, pos.y, circleRadius * scale, 0, 2 * Math.PI);
-                
-                // Color based on ball count
-                if (ballCount >= 3) {
-                    ctx.strokeStyle = '#f00'; // Red
-                } else if (ballCount === 2) {
-                    ctx.strokeStyle = '#ff0'; // Yellow
-                } else {
-                    ctx.strokeStyle = '#fff'; // White
-                }
-                
-                ctx.lineWidth = 3 * scale;
+                ctx.arc(pos.x, pos.y, zoneRadius * finalScale, 0, 2 * Math.PI);
+                ctx.strokeStyle = count > 0 ? `hsl(${count * 60}, 100%, 50%)` : '#fff';
+                ctx.lineWidth = 2 * finalScale;
                 ctx.stroke();
             });
 
-            // Draw balls
-            balls.forEach(ball => {
-                let ballX, ballY;
-                let isStretched = false;
-                let angleToTarget = 0;
-                let stretchFactor = 1.5;
-
-                if (ball.isMoving) {
-                    const start = currentPositions[ball.currentCircleIndex];
-                    const end = currentPositions[ball.targetCircleIndex];
-                    ballX = start.x + (end.x - start.x) * ball.progress;
-                    ballY = start.y + (end.y - start.y) * ball.progress;
-                    
-                    isStretched = true;
-                    angleToTarget = Math.atan2(end.y - start.y, end.x - start.x);
+            // Draw Awareness Nodes
+            awarenessNodes.forEach(node => {
+                let x, y;
+                if (node.isMoving) {
+                    const start = currentPositions[node.currentZoneIndex];
+                    const end = currentPositions[node.targetZoneIndex];
+                    x = start.x + (end.x - start.x) * node.progress;
+                    y = start.y + (end.y - start.y) * node.progress;
                 } else {
-                    const pos = currentPositions[ball.currentCircleIndex];
-                    const group = ballsOnCircle[ball.currentCircleIndex];
-                    const idx = group.indexOf(ball);
-                    const count = group.length;
-
-                    if (count > 1) {
-                        const offset = circleRadius * 0.4;
-                        const angle = (idx / count) * 2 * Math.PI;
-                        ballX = pos.x + offset * Math.cos(angle);
-                        ballY = pos.y + offset * Math.sin(angle);
-                    } else {
-                        ballX = pos.x;
-                        ballY = pos.y;
-                    }
+                    const pos = currentPositions[node.currentZoneIndex];
+                    x = pos.x; y = pos.y;
                 }
-
                 ctx.beginPath();
-                if (isStretched) {
-                    ctx.ellipse(ballX, ballY, ballRadius * stretchFactor, ballRadius, angleToTarget, 0, 2 * Math.PI);
-                } else {
-                    ctx.arc(ballX, ballY, ballRadius, 0, 2 * Math.PI);
-                }
-                ctx.fillStyle = ball.isMoving ? '#ff0' : '#0f0'; 
+                ctx.arc(x, y, awarenessRadius, 0, 2 * Math.PI);
+                ctx.fillStyle = '#0f0';
                 ctx.fill();
             });
         }
@@ -197,57 +143,36 @@
         let lastTimestamp = performance.now();
         function animate(currentTime) {
             if (!isPaused) {
-                // Update num balls
-                const targetNumBalls = parseInt(document.getElementById('numBalls').value);
-                while (balls.length < targetNumBalls) {
-                    balls.push(createBall());
-                }
-                while (balls.length > targetNumBalls) {
-                    balls.pop();
-                }
+                const numNodes = parseInt(document.getElementById('numBalls').value);
+                while (awarenessNodes.length < numNodes) awarenessNodes.push(createNode());
+                while (awarenessNodes.length > numNodes) awarenessNodes.pop();
 
-                const ballSpeed = parseInt(document.getElementById('ballSpeed').value);
-                const rotSpeed = parseInt(document.getElementById('rotSpeed').value) / 1000;
-
+                const speed = parseInt(document.getElementById('ballSpeed').value);
+                const rotSpeed = parseInt(document.getElementById('rotSpeed').value) / 2000;
                 totalRotation += rotSpeed;
 
-                balls.forEach(ball => {
-                    const ballDeltaTime = currentTime - lastTimestamp;
-                    ball.lastTime = currentTime;
-
-                    if (ball.isMoving) {
-                        ball.progress += ballDeltaTime / ballSpeed;
-                        if (ball.progress >= 1) {
-                            ball.progress = 0;
-                            ball.currentCircleIndex = ball.targetCircleIndex;
-                            
-                            circles[ball.currentCircleIndex].reactionProgress = 1;
-                            
-                            let nextTarget;
-                            do {
-                                nextTarget = Math.floor(Math.random() * numCircles);
-                            } while (nextTarget === ball.currentCircleIndex);
-                            
-                            ball.targetCircleIndex = nextTarget;
-                            ball.isMoving = false;
-                            ball.pauseStartTime = currentTime;
+                awarenessNodes.forEach(node => {
+                    const dt = currentTime - lastTimestamp;
+                    if (node.isMoving) {
+                        node.progress += dt / speed;
+                        if (node.progress >= 1) {
+                            node.progress = 0;
+                            node.currentZoneIndex = node.targetZoneIndex;
+                            node.targetZoneIndex = getWeightedNextZone(node.currentZoneIndex);
+                            node.isMoving = false;
+                            node.pauseStartTime = currentTime;
                         }
-                    } else {
-                        if (currentTime - ball.pauseStartTime > 500) {
-                            ball.isMoving = true;
-                        }
+                    } else if (currentTime - node.pauseStartTime > 1000) {
+                        node.isMoving = true;
                     }
                 });
+                lastTimestamp = currentTime;
             }
-            
-            lastTimestamp = currentTime;
-            draw(totalRotation);
+            draw(totalRotation, currentTime);
             requestAnimationFrame(animate);
         }
 
-        // Initialize with one ball
-        balls.push(createBall());
-
+        awarenessNodes.push(createNode());
         requestAnimationFrame(animate);
     </script>
 </body>
