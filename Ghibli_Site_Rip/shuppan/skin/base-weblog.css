@@ -1,0 +1,151 @@
+@charset "UTF-8";
+/*
+name: Rapha 3Column
+designer: Shinichi Takai
+developer: Rapha Ltd.
+developer_url: http://rapha.ac/
+*/
+* {
+	font-style: normal;
+	font-weight: normal;
+	font-variant: normal;
+	margin: 0;
+	padding: 0;
+	text-decoration: none;
+	line-height: 1;
+}
+body {
+	margin: 0;
+	padding: 0;
+}
+hr { display: none; }
+div, h1, h2, h3, h4, h5, h6, p, ul, ol, li, dl, dt, dd, blockquote, pre, address {
+	display: block;
+	margin: 0;
+	padding: 0;
+	text-align: left;
+}
+ul,
+ol {
+	padding: 0 0 0.1em 0;
+}
+li {
+	display: list-item;
+	margin: 0.3em 0;
+}
+ul ul,
+ol ol,
+ol ul {
+	padding: 0 0 0.1em 10px;
+}
+dl {
+	padding-top: 0.4em;
+	margin-bottom: 0.5em;
+}
+dt {
+	margin: 0.3em 0 0.5em 0;
+}
+dd {
+	margin: 0 0 0.7em 0.7em;
+}
+p {
+	margin: 0 0 0.5em 0;
+}
+blockquote {
+	margin: 0 0 0.5em 0;
+	padding: 0.8em;
+}
+blockquote p {
+	margin: 0 0 0.5em 0;
+}
+pre {
+	padding: 0.8em;
+	margin: 0.8em 0;
+	white-space: pre;
+	overflow: visible;
+}
+pre p {
+	margin: 0 0 0.8em 0;
+}
+del {
+	text-decoration: line-through;
+	font-weight: normal;
+	color: #CCC;
+}
+ins {
+	display: block;
+	margin: 1em 0;
+	padding: 1em;
+	border-width: 1px;
+	border-style: solid;
+}
+del ins {
+	text-decoration: line-through;
+}
+h1 ins, h2 ins, h3 ins, h4 ins, h5 ins, h6 ins, p ins, pre ins, address ins, ins, dt ins, dd ins {
+	display: inline;
+	margin: 0;
+	text-decoration: none;
+	border: none;
+}
+pre ins, code ins, samp ins, var ins, kbd ins {
+	border: none;
+	margin: 0;
+	padding: 0;
+	text-decoration: underline;
+}
+table, th, td {
+	border-style: solid;
+	border-collapse: collapse;
+}
+table {
+	margin: 1em 0;
+	border-width: 0;
+	border-spacing: 0;
+}
+table a {
+	font-weight: normal !important;
+}
+caption {
+	margin: 0 0 0.2em 0;
+}
+tr {
+	border: none;
+}
+th, td {
+	border-width: 0;
+}
+th {
+	text-align: center;
+}
+a, abbr, acronym, bdo, big, cite, code, dfn, em, img, kbd, object, q, ruby, samp, small, span, strong, sub, sup, var {
+	display: inline;
+	line-height: inherit;
+}
+abbr, acronym, dfn {
+	border-width: 0 0 1px 0;
+	border-style: dotted;
+	cursor: help;
+}
+a {
+	text-decoration: underline;
+	font-weight: normal;
+}
+img {
+	vertical-align:bottom;
+	-ms-interpolation-mode: bicubic;
+}
+a img {
+	border: none;
+	text-decoration: none;
+}
+q {
+	padding: 0 0.2em;
+	font-style: italic;
+}
+strong {
+	font-weight: bold;
+}
+em {
+	font-style: italic;
+}

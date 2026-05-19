@@ -1,0 +1,36 @@
+/*
+ * Globals
+ */
+
+/*
+ * Base structure
+ */
+
+body {
+	background-color: #231F20;
+  font-family: sans-serif;
+}
+
+
+.modal-content {
+  background-color: #181818;
+  color: #fff;
+}
+.modal-header {
+  border-bottom: none;
+}
+.modal-body {
+  padding: 0 3px;
+}
+
+.modal-footer {
+  border-top: none;
+}
+.close {
+  color: #fff;
+}
+
+.close:hover {
+  color: #fff;
+}
+

@@ -1,0 +1,12 @@
+<?xml version="1.0"?> 
+<rsd version="1.0" xmlns="http://archipelago.phrasewise.com/rsd">
+<service>
+<engineName>Rapha 3.33-ja</engineName> 
+<engineLink>http://rapha.ac/</engineLink>
+<homePageLink>https://www.ghibli.jp/ged_02/</homePageLink>
+<apis>
+<api name="MetaWeblog" preferred="true" apiLink="https://www.ghibli.jp/blogadmin/mt-xmlrpc.cgi" blogID="2" />
+<api name="Blogger" preferred="false" apiLink="https://www.ghibli.jp/blogadmin/mt-xmlrpc.cgi" blogID="2" />
+</apis>
+</service>
+</rsd>

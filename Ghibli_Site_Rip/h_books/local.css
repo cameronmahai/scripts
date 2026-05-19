@@ -1,0 +1,39 @@
+/* Web site design Rapha,Inc. */
+/* http://rapha.ac/ */
+/* mailto : info@rapha.ac */
+/* Copyright (C) 2003 Rapha, Inc. All rights reserved. */
+body      {
+	background: #E4E0D4;
+	background-image: url(./images/w_bg.gif);
+	background-repeat:repeat;
+	padding: 0px;
+	margin: 0px;
+    color: #555555;
+}
+a:link    {
+	color: #773300;
+}
+a:visited {
+	color: #996633;
+}
+a:active  {
+	color: #773300;
+}
+a:hover   {
+	color: #000099;
+}
+a.submenu         {
+	color: #555555;
+}
+a.submenu:link    {
+	color: #555555;
+}
+a.submenu:visited {
+	color: #555555;
+}
+a.submenu:active  {
+	color: #773300;
+}
+a.submenu:hover   {
+	color: #000099;
+}

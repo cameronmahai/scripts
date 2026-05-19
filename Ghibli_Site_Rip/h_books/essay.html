@@ -1,0 +1,316 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+<head>
+<meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta name="Author" content="Shinichi Takai ( Rapha, Inc. [ http://rapha.ac/ ] )">
+<meta name="Description" content="復刊記念特別WEBサイト 堀田善衞「時代と人間」">
+<meta name="Keywords" content="堀田善衞, スタジオジブリ, 路上の人, 聖者の行進, 時代と人間, 宮崎駿, 芥川賞">
+<meta name="Generator" content="Rapha system">
+<link rel="stylesheet" type="text/css" href="./css/style.css" charset="Shift_JIS">
+<link rel="stylesheet" type="text/css" href="./local.css" charset="Shift_JIS">
+<script type="text/javascript">
+<!--
+var Win=(navigator.userAgent.indexOf("Win")!=-1);
+var Mac=(navigator.userAgent.indexOf("Mac")!=-1);
+var Explorer=(navigator.appName.indexOf("Explorer")!=-1);
+var Netscape=(navigator.appName.indexOf("Netscape")!=-1);
+var opera=(navigator.userAgent.indexOf("Opera")!=-1);
+var Version=navigator.appVersion.charAt(0);
+if (opera) {
+	document.write('<link rel="stylesheet" href="./css/etc.css" type="text/css">');
+} else if (Win && Explorer && Version=="4") {
+	document.write('<link rel="stylesheet" href="./css/win_ie.css" type="text/css">');
+} else if (Win && Netscape && Version=="4") {
+	document.write('<link rel="stylesheet" href="./css/win_nn4.css" type="text/css">');
+} else if (Explorer && Mac && Version=="4") {
+	document.write('<link rel="stylesheet" href="./css/mac_ie.css" type="text/css">');
+} else if (Mac && Netscape && Version=="5") {
+	document.write('<link rel="stylesheet" href="./css/mac_nn6.css" type="text/css">');
+} else if (Mac && Netscape && Version=="4") {
+	document.write('<link rel="stylesheet" href="./css/mac_nn4.css" type="text/css">');
+} else {
+	document.write('<link rel="stylesheet" href="./css/etc.css" type="text/css">');
+}
+function openimg(imgpath, xx,yy,set_name){
+	imgaewindow=window.open("", set_name,'width='+xx+',height='+yy+',toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=no,resizable=no,screenX=20,screenY=50,left=20,top=50');
+	window.imgaewindow.document.write('<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">');
+	window.imgaewindow.document.write('<html lang="ja">');
+	window.imgaewindow.document.write('<head>');
+	window.imgaewindow.document.write('<meta http-equiv="Content-type" content="text/html; charset=UTF-8">');
+	window.imgaewindow.document.write('<meta http-equiv="Content-Script-Type" content="text/javascript">');
+	window.imgaewindow.document.write('<meta http-equiv="Content-Style-Type" content="text/css">');
+	window.imgaewindow.document.write('<meta name="Author" content="Rapha, Inc.">');
+	window.imgaewindow.document.write('<meta name="Generator" content="Rapha system">');
+	window.imgaewindow.document.write('<title>'+set_name+'</title>');
+	window.imgaewindow.document.write('</head>');
+	window.imgaewindow.document.write('<body leftmargin="0" rightmargin="0" topmargin="0" marginheight="0" marginwidth="0">');
+	window.imgaewindow.document.write('<div style="border: none; padding: 0px; margin: auto; vertical-align: middle; text-align: center;"><a href="JavaScript:window.close()"><img src="'+imgpath+'" border="0" style="height:'+yy+'px; width:'+xx+'px;" alt="画像をクリックするとウィンドウを閉じます。"></a></div>');
+	window.imgaewindow.document.write('</body>');
+	window.imgaewindow.document.write('</html>');
+}
+var img_number = 0;
+var img_name = '';
+var ii = 0;
+var cnt = 9;
+var i_ovr= new Array();
+var i_out= new Array();
+for( ii = 0 ; ii < cnt ; ii++ ){
+i_ovr[ii] = new Image();
+i_out[ii] = new Image();
+}
+// マウスが乗ったときの画像を登録
+i_ovr[0].src = './images/b_top_up.gif';
+i_ovr[1].src = './images/b_relation_up.gif';
+i_ovr[2].src = './images/b_chronological_up.gif';
+i_ovr[3].src = './images/b_books_up.gif';
+i_ovr[4].src = './images/b_essay_up.gif';
+i_ovr[5].src = './images/b_report_up.gif';
+i_ovr[6].src = './images/b_links_up.gif';
+i_ovr[7].src = './images/g_home_up.gif';
+i_ovr[8].src = './images/g_print_up.gif';
+// マウスが離れたときの画像を登録
+i_out[0].src = './images/b_top_down.gif';
+i_out[1].src = './images/b_relation_down.gif';
+i_out[2].src = './images/b_chronological_down.gif';
+i_out[3].src = './images/b_books_down.gif';
+i_out[4].src = './images/b_essay_down.gif';
+i_out[5].src = './images/b_report_down.gif';
+i_out[6].src = './images/b_links_down.gif';
+i_out[7].src = './images/g_home_down.gif';
+i_out[8].src = './images/g_print_down.gif';
+function img_over (img_name,img_number){
+document.images[img_name].src = i_ovr[img_number].src;
+}
+function img_out (img_name,img_number){
+document.images[img_name].src = i_out[img_number].src;
+}
+//-->
+</script>
+
+<title>復刊記念特別WEBサイト 堀田善衞「時代と人間」 - 宮崎駿エッセー 第２回</title>
+</head>
+
+<body>
+<table cellspacing="0" cellpadding="0" border="0" style="height:100%; width:100%;" class="cs0" summary="frame"><tbody>
+<tr>
+<td class="cs0">
+	<div style="height:18px;"><img src="./images/point.gif" style="height:18px; width:720px;" alt="line"></div>
+	<table cellspacing="0" cellpadding="0" border="0" style="width:100%;" class="cs0" summary="frame"><tbody>
+	<tr>
+	<td style="width:12px;" class="cs0"><img src="./images/point.gif" style="height:88px; width:12px;" alt="line"></td>
+	<td class="box0"><a href="./"><img src="./images/title.gif" style="height:88px; width:400px;" alt="復刊記念特別ＷＥＢサイト 堀田善衞「時代と人間」"></a></td>
+	<td class="r_box0">
+		<table cellspacing="0" cellpadding="0" border="0" style="width:256px;" class="m_right_bottom" summary="frame"><tbody>
+		<tr>
+		<td style="width:64px;" class="cs2"><a href="./books.html#rojyou"><img src="./images/b_rojyou.gif" style="height:84px; width:58px;" alt="路上の人"></a></td>
+		<td style="width:64px;" class="cs2"><a href="./books.html#seijya"><img src="./images/b_seijya.gif" style="height:84px; width:58px;" alt="聖者の行進"></a></td>
+		<td style="width:64px;" class="cs2"><a href="./books.html#nhk"><img src="./images/b_nhk.gif" style="height:84px; width:58px;" alt="ＮＨＫ人間大学 時代と人間"></a></td>
+		<td style="width:64px;" class="cs2"><a href="./books.html#dvd"><img src="./images/b_dvd.gif" style="height:84px; width:58px;" alt="DVD-BOX/VIDEO-BOX 堀田善衞 時代と人間"></a></td>
+		</tr>
+		</tbody></table>
+	</td>
+	<td style="width:18px;" class="cs0"><img src="./images/point.gif" style="height:88px; width:18px;" alt="line"></td>
+	</tr>
+	</tbody></table>
+	<div style="height:12px;"><img src="./images/point.gif" style="height:12px; width:720px;" alt="line"></div>
+	<table cellspacing="0" cellpadding="0" border="0" style="width:100%;" class="cs0" summary="frame"><tbody>
+	<tr>
+	<td style="width:100%;">
+		<div style="height:2px; background:#BAAA94;"><img src="./images/point.gif" style="height:2px; width:1px;" alt="line"></div>
+		<div style="height:4px; background:#DBC8B5;"><img src="./images/point.gif" style="height:4px; width:1px;" alt="line"></div>
+		<div style="height:1px; background:#F0F0F0;"><img src="./images/point.gif" style="height:1px; width:1px;" alt="line"></div>
+		<div style="height:1px; background:#FDFFF3;"><img src="./images/point.gif" style="height:1px; width:1px;" alt="line"></div>
+		<table cellspacing="0" cellpadding="0" border="0" style="width:100%; background:#FFF8F2; background-image:url(./images/sub_bg.gif);background-repeat:no-repeat;" class="cs0" summary="frame"><tbody>
+		<tr>
+		<td style="width:100%;">
+
+			<table cellspacing="0" cellpadding="0" border="0" style="width:100%;" class="cs0" summary="frame"><tbody>
+			<tr>
+			<td style="width:240px" class="box0">
+
+				<table cellspacing="0" cellpadding="0" border="0" style="width:240px;" class="m_left_top" summary="frame"><tbody>
+				<tr>
+				<td rowspan="10" style="width:23px;" class="box0"><img src="./images/point.gif" style="height:23px; width:23px;" alt="line"></td>
+				<td style="width:188px;" class="cs0"><img src="./images/point.gif" style="height:12px; width:172px;" alt="line"></td>
+				<td style="width:29px;" class="cs0"><img src="./images/point.gif" style="height:12px; width:29px;" alt="line"></td>
+				</tr>
+				<tr>
+				<td style="width:188px;" class="cs0"><a href="./" onmouseover="img_over('a01',0)" onmouseout="img_out('a01',0)"><img src="./images/b_top_down.gif" style="height:32px; width:188px;" alt="表紙に戻る" name="a01"></a></td>
+				<td style="width:29px;" class="cs0"><img src="./images/point.gif" style="height:12px; width:29px;" alt="line"></td>
+				</tr>
+				<tr>
+				<td style="width:188px;" class="cs0"><a href="./relation.html" onmouseover="img_over('a02',1)" onmouseout="img_out('a02',1)"><img src="./images/b_relation_down.gif" style="height:32px; width:188px;" alt="スタジオジブリと堀田善衞" name="a02"></a></td>
+				<td style="width:29px;" class="cs0"><img src="./images/point.gif" style="height:12px; width:29px;" alt="line"></td>
+				</tr>
+				<tr>
+				<td style="width:188px;" class="cs0"><a href="./chronological.html" onmouseover="img_over('a03',2)" onmouseout="img_out('a03',2)"><img src="./images/b_chronological_down.gif" style="height:32px; width:188px;" alt="堀田善衞年譜" name="a03"></a></td>
+				<td style="width:29px;" class="cs0"><img src="./images/point.gif" style="height:12px; width:29px;" alt="line"></td>
+				</tr>
+				<tr>
+				<td style="width:188px;" class="cs0"><a href="./books.html" onmouseover="img_over('a04',3)" onmouseout="img_out('a04',3)"><img src="./images/b_books_down.gif" style="height:32px; width:188px;" alt="復刊作品･ビデオグラム紹介" name="a04"></a></td>
+				<td style="width:29px;" class="cs0"><img src="./images/point.gif" style="height:12px; width:29px;" alt="line"></td>
+				</tr>
+				<tr>
+				<td style="width:188px;" class="cs0"><a href="./essay.html" onmouseover="img_over('a05',4)" onmouseout="img_out('a05',4)"><img src="./images/b_essay_down.gif" style="height:32px; width:188px;" alt="宮崎駿エッセー再録" name="a05"></a></td>
+				<td style="width:29px;" class="cs0"><img src="./images/point.gif" style="height:12px; width:29px;" alt="line"></td>
+				</tr>
+				<tr>
+				<td colspan="2" style="width: 188px; padding: 0px 0px 8px 20px;" class="left_top"><span class="txt1j"><a href="./essay_01.html">第１回</a> / <a href="./essay.html">第２回</a></span></td>
+				</tr>
+				<tr>
+				<td style="width:188px;" class="cs0"><a href="./report.html" onmouseover="img_over('a06',5)" onmouseout="img_out('a06',5)"><img src="./images/b_report_down.gif" style="height:32px; width:188px;" alt="「時代と人間」通信" name="a06"></a></td>
+				<td style="width:29px;" class="cs0"><img src="./images/new.gif" style="height:12px; width:29px;" alt="line"></td>
+				</tr>
+				<tr>
+				<td style="width:188px;" class="cs0"><a href="./links.html" onmouseover="img_over('a07',6)" onmouseout="img_out('a07',6)"><img src="./images/b_links_down.gif" style="height:32px; width:188px;" alt="リンク" name="a07"></a></td>
+				<td style="width:29px;" class="cs0"><img src="./images/point.gif" style="height:12px; width:29px;" alt="line"></td>
+				</tr>
+				<tr>
+				<td style="width:188px;" class="cs0"><img src="./images/point.gif" style="height:12px; width:172px;" alt="line"></td>
+				<td style="width:29px;" class="cs0"><img src="./images/point.gif" style="height:12px; width:29px;" alt="line"></td>
+				</tr>
+				</tbody></table>
+
+				<table cellspacing="0" cellpadding="0" border="0" style="width:240px;" class="m_left_top" summary="frame"><tbody>
+				<tr>
+				<td style="width:23px;" class="box0"><img src="./images/point.gif" style="height:23px; width:23px;" alt="line"></td>
+				<td style="width:218px;" class="box0"><span class="txt1j"><a href="http://www.ntv.co.jp/ghibli/">スタジオジブリ</a>は２００４年２月、堀田善衞氏の著作の３作品を復刊し、堀田氏が出演した「ＮＨＫ人間大学」などの番組をビデオグラム化します。このＷＥＢサイトは、その書籍とビデオグラムを紹介するサイトです。</span></td>
+				</tr>
+				</tbody></table>
+				<div><img src="./images/point.gif" style="height:24px; width:240px;" alt="line"></div>
+			</td>
+			<td style="width:100%;" class="center_top">
+				<div><img src="./images/point.gif" style="height:24px; width:480px;" alt="line"></div>
+				<div style="padding-right:24px;" class="right_middle"><span class="ntxt2j"><a href="./">表紙</a> &gt; <a href="./essay.html">宮崎駿エッセー再録</a> &gt; <span style="border-bottom: #CCCCCC 1px dashed;padding: 2px;">第２回</span></span></div>
+				<div><img src="./images/point.gif" style="height:48px; width:480px;" alt="line"></div>
+				<table cellspacing="0" cellpadding="0" border="0" style="width:480px;" class="m_center_top" summary="frame"><tbody>
+				<tr>
+				<td style="width:480px;" class="boxtitle"><img src="./images/arrow.gif" style="height:12px; width:12px;" alt="*"><span class="ntxt3j">第２回　堀田さんの声が聞こえる</span></td>
+				</tr>
+				<tr>
+				<td style="width:480px;" class="box4">
+					<div style="background-image:url(./images/dot.gif);background-repeat:repeat-x;height:3px;"><img src="./images/point.gif" style="height:1px; width:1px;" alt=""></div>
+				</td>
+				</tr>
+				<tr>
+				<td style="width:480px;" class="r_box0"><span class="ntxt1j">[ 2003.12.20 ]</span></td>
+				</tr>
+				<tr>
+				<td style="width:480px;" class="box8">
+					<p class="txtindent"><span class="txt2j">堀田善衞さんが、「青春と読書」誌に語った自伝的回想録である。表題に『めぐりあいし人びと』とあるが、日常身辺の出会いを書いたものではない。</span></p>
+					<p class="txtindent"><span class="txt2j">人間の歴史、人間と国家、という堀田さんの生涯の主題にそって、めぐりあった人々や出来事が精錬され「歴史を見定める」ために「若い諸君にいくらかでも役に立ってくれれば……」という強いメッセージがこめられた内容になっている。</span></p>
+					<p class="txtindent"><span class="txt2j">先年、ある鼎談の席で、堀田さんのお話をうかがう機会を得たのだったが、若い僕があんまりぼんやりしているので、この本でもう一度かみ砕いてお話しして下さったのだ、と受けとめている。ほぼ同時期に、堀田さんはＴＶの講座で「時代と人間」という講義 <span class="nowrap">――</span> これも誠に感動的な内容だった <span class="nowrap">――</span> をされたが、その時も、まるで僕のために堀田さんが講義をして下さっているように感じた。</span></p>
+					<br>
+					<p class="txtindent"><span class="txt2j">僕にとって、堀田さんは格別の人なのだ。</span></p>
+					<p class="txtindent"><span class="txt2j">読者になって三十年にもなるが、この間、堀田さんの歩みと作品が、どれほど僕の支えになってくれたか判らない。日本という国が大嫌いで、日本人であることが恥しくてたまらなかった若い頃に、堀田さんの『広場の孤独』をはじめとする諸作品に出会って、この人は自分と同じ問題をかかえているらしいと感じた。その人ははるかに深く、ずっと遠くへと背筋をのばして歩いていた。僕などいくら努力しても、とても追いつけないのだが、後姿がいつも進むべき道を示していてくれた。</span></p>
+					<p class="txtindent"><span class="txt2j">自分が、国家としての日本と、風土としての日本を、分けて考えようと努力できるようになったのは、ほんの最近のことなのだが、その裏返しで凶暴な攘夷思想が頭をもたげたり、諸事あやふやになって、安っぽいニヒリズムに流されたりする。そんな時に、不思議と堀田さんのエッセーに出会う。そして、やっぱり、はるかに深くずっと遠くを歩いている後姿を発見して、正気にかえるのである。</span></p>
+					<br>
+					<p class="txtindent"><span class="txt2j">湾岸戦争の時だった。あの辺の国境は植民地時代の産物で、そこに住む人々にかかわりなしに、利権で引いた線にすぎない。イラクのクウェート占領が悪いのは判っていても、イラン・イラク戦争を通じて武器をたれ流しにして、イラクを軍事大国にしてしまったのは、アメリカをはじめとする西欧諸国ではないかという反撥が僕にはあった。まして、クウェートは石油成金の不動産国家で、油太りした王族と、ひと握りの国民が財テクにうつつをぬかし、外国人労働者をアゴで使う国である。</span></p>
+					<p class="txtindent"><span class="txt2j">そんな国家を守るのが正義なのだろうか。ブッシュ大統領の演説にはウンザリした。まして、日本の石油資源確保のために国際貢献を口にする輩には、もっと腹が立った。国中を自動車だらけにして、息子をアッシー君にしたてて、まだ石油が足りないというのか。</span></p>
+					<p class="txtindent"><span class="txt2j">しかし、サダム・フセインはなおいけない。オベンチャラに気勢をあげる貧相な人々の前の、得意気な彼を見ると、理解しようと努力する気力もうせた。</span></p>
+					<br>
+					<p class="txtindent"><span class="txt2j">ＴＶを観つづける間に、やたらに腹が立って来てしまった。そして、誰かが僕の中で怒鳴った。</span></p>
+					<div style="text-indent: -8pt; border: none; padding: 0px 4px 0px 4px; text-align: left;"><span class="txt2j">「やっちまえ」</span></div>
+					<p class="txtindent"><span class="txt2j">戦争をしちまえ、アメリカもイラクもグシャグシャになってしまえ。そうすれば、もうちょっと風通しが良くなるかもしれない。そんな声なのだ。</span></p>
+					<p class="txtindent"><span class="txt2j">僕は困惑した。情報操作されたＴＶと判っているのに、正気を失う自分にあわてた。「やっちまえ」気分に流されてしまいそうな自分に愕然とした。僕の父親が、日米開戦の日に、真珠湾攻撃のニュースで「やったァ」と興奮したという話を聞いた時、僕はなんと愚かな男だろうと思ったのだったが、なんだ、自分もちっともちがわないんだと、思い知らされたのである。</span></p>
+					<p class="txtindent"><span class="txt2j">戦後民主主義の、戦争は絶対にしてはならないというテーゼを、僕は無条件で受け入れて来た。そのテーゼは今も正しい。しかし、その根拠となる理念が、自分の中で何とも弱いのだ。多民族が入り乱れ、憎悪が、憎悪の拡大再生産をつづける現実に出会うと、その弱さがモロに出てしまう。危機管理能力がないのは、何も自民党の先生方だけではない。</span></p>
+					<br>
+					<p class="txtindent"><span class="txt2j">僕は、マスコミのどんな人達よりも、堀田さんの意見を聞きたかった。堀田さんなら正しい判断を示してくれる。少くとも、「やっちまえ」とは絶対にいわないはずだ。</span></p>
+					<p class="txtindent"><span class="txt2j">この本で、堀田さんは、領土を持たない、だから国家利害のない立場で判断を下すヴァチカン放送の存在に触れながら、湾岸戦争について次のように述べている。</span></p>
+					<br>
+					<div style="text-indent: -8pt; border: none; padding: 0px 4px 0px 4px; text-align: left;"><span class="txt2j">「今回の湾岸戦争にたいするヴァチカンの見解というのは、簡単にいえば、意思疎通のできない者同士が戦おうとしている戦争であるということです。つまり、一方のイラクは、オスマン・トルコ帝国以来の歴史によって戦おうとしている。ところが、もう一方のアメリカ側は、現在の利害と現在の法、すなわち国連によって戦おうとしている。これでは話の通じようがない。話の通じない者同士が武器をとってはいけない。……私は、この考えはたいへん妥当で、かつ公正だと思いました。だからこそ、話し合いをつづけるべきだ、ということですね」</span></div>
+					<br>
+					<p class="txtindent"><span class="txt2j">お前は何をうろたえているんだ、本当に私の作品を読んで来たのか、という堀田さんの叱責が聞こえるようであった。政治にも経済にも現在しかない、ひなたの溜り水のような日本の現状では、堀田さんのいう重層的な歴史感覚へ過去も未来も現在も仏教の曼陀羅のように人間をとりまいているという見方を、身につけるのはとてもむずかしい。しかし、少くとも自分の歴史感覚や考えに欠陥があると自戒していこうと思う。さもないと、すぐ「やっちまえ」に押し流されてしまう。世界は混乱と崩壊の時代をむかえているのだから、自分の身のまわりに何が起こるか判らない。その時、堀田さんのようでありたい。</span></p>
+					<p class="txtindent"><span class="txt2j">プラハの春を押しつぶしたソ連軍のチェコ侵略の時、モスクワの作家会議の満座の敵意の中で、それを批判する堀田さん。</span></p>
+					<p class="txtindent"><span class="txt2j">第二次世界大戦の末期の上海で、中国の花嫁に無礼をはたらく日本兵を制止して、暴行を受けながら、日本国の中国侵略の実像を、肌で自分のものにした堀田さん。</span></p>
+					<p class="txtindent"><span class="txt2j">ブレジネフ時代のソ連で、危険すぎる反体制活動に身を挺する女性に、時代が折れるのを待て、ペンを血にひたすことはない、と止めつつ、その人の苦悩と絶望を受けとめる堀田さんの勇気。</span></p>
+					<p class="txtindent"><span class="txt2j">一九四五年三月の東京大空襲の焼跡で、知人の消息をたずね歩くうちに、昭和天皇の焼跡視察に出会い、戦災を受けた人々が、本来謝らねばならない立場の天皇に、逆に土下座して謝る様子を目撃して、日本と日本人に絶望した堀田さん。その運命的な体験を出発に、沢山の人々と出会い <span class="nowrap">――</span> それは同時代の人に限らず、鴨長明、藤原定家という人々も含めて <span class="nowrap">――</span> 独特の歴史感覚を育て、堀田文学をつくった人。</span></p>
+					<br>
+					<div style="text-indent: -8pt; border: none; padding: 0px 4px 0px 4px; text-align: left;"><span class="txt2j">「戦後派の文士に遺言のようなことになってしまいました」</span></div>
+					<p class="txtindent"><span class="txt2j">とおっしゃるこの本を、五十歳を越えたのに、堀田さんにとっては困ったものの若い諸君に入る自分だが、僕よりもっと若くて、バブルの中で大人になってしまった人達に、堀田善衞の全著作と共にすすめたい。</span></p>
+					<div class="r_box8"><span class="ntxt1j">(初出「青春と読書」集英社一九九三年一月号)<br>『出発点』（徳間書店）より</span></div>
+					<br>
+					<div class="box18">
+						<div class="box0"><a name="kaisetsusya"><span class="txt1j"><span style="color:#BAAA94;">■</span> 注釈</span></a></div>
+						<div class="box4"><span class="txt1j">『めぐりあいし人びと』は、一九九三年に出版。内容は自伝的回想録で、上海での敗戦体験やアジア･アフリカ作家会議のこと、訪れた海外のことなどを記している。また「めぐりあった人」の中に歴史上の人物である西行や鴨長明、藤原定家らが含まれているのがいかにも堀田氏らしい。</span></div>
+					</div>
+					<div><img src="./images/point.gif" style="height:18px; width:480px;" alt="line"></div>
+					<table cellspacing="0" cellpadding="0" border="0" style="width:auto;" class="m_right_middle" summary="frame"><tbody>
+					<tr>
+					<td style="width:15px;" class="cs2"><img src="./images/a.gif" style="height:11px; width:11px;" alt="link"></td>
+					<td style="width:auto;" class="left_middle"><span class="ntxt2j">ページ切替： <a href="./essay_01.html">第１回</a> / <a href="./essay.html">第２回</a></span></td>
+					</tr>
+					</tbody></table>
+				</td>
+				</tr>
+				</tbody></table>
+				<div><img src="./images/point.gif" style="height:48px; width:480px;" alt="line"></div>
+			</td>
+			</tr>
+			</tbody></table>
+
+		</td>
+		</tr>
+		</tbody></table>
+		<div style="height:1px; background:#FDFFF3;"><img src="./images/point.gif" style="height:1px; width:1px;" alt="line"></div>
+		<div style="height:1px; background:#F0F0F0;"><img src="./images/point.gif" style="height:1px; width:1px;" alt="line"></div>
+		<div style="height:4px; background:#DBC8B5;"><img src="./images/point.gif" style="height:4px; width:1px;" alt="line"></div>
+		<div style="height:2px; background:#BAAA94;"><img src="./images/point.gif" style="height:2px; width:1px;" alt="line"></div>
+	</td>
+	</tr>
+	</tbody></table>
+	<div style="height:12px;"><img src="./images/point.gif" style="height:12px; width:720px;" alt="line"></div>
+	<table cellspacing="0" cellpadding="0" border="0" style="width:100%;" class="cs0" summary="frame"><tbody>
+	<tr>
+	<td style="width:100%;">
+		<table cellspacing="0" cellpadding="0" border="0" style="width:100%;" class="cs0" summary="frame"><tbody>
+		<tr>
+		<td style="text-align:left;padding-left:24px;width:100%;">
+			<div><span class="txt1j"><span style="color:#BAAA94;">■</span> <a href="./" class="submenu">表紙</a></span></div>
+			<div><span class="txt1j"><span style="color:#BAAA94;">■</span> <a href="./relation.html" class="submenu">スタジオジブリと堀田善衞</a></span></div>
+			<div><span class="txt1j"><span style="color:#BAAA94;">■</span> <a href="./chronological.html" class="submenu">堀田善衞年譜</a></span></div>
+			<div><span class="txt1j"><span style="color:#BAAA94;">■</span> <a href="./books.html" class="submenu">復刊作品・ビデオグラム紹介</a></span></div>
+			<div><span class="txt1j"><span style="color:#BAAA94;">■</span> <a href="./essay.html" class="submenu">宮崎駿エッセー再録</a></span></div>
+			<div><span class="txt1j"><span style="color:#BAAA94;">■</span> <a href="./report.html" class="submenu">「時代と人間」通信</a></span></div>
+			<div><span class="txt1j"><span style="color:#BAAA94;">■</span> <a href="./links.html" class="submenu">リンク</a></span></div>
+		</td>
+		<td style="width:120px;" class="r_box0">
+			<table cellspacing="0" cellpadding="0" border="0" style="width:120px;" class="m_center_top" summary="frame"><tbody>
+			<tr>
+			<td rowspan="3" style="width:60px;"><img src="./images/ghiblilogo_01.gif" style="height:88px; width:60px;" alt="スタジオジブリ"></td>
+			<td style="width:60px;"><a href="http://www.ntv.co.jp/ghibli/" onmouseover="img_over('a08',7)" onmouseout="img_out('a08',7)"><img src="./images/g_home_down.gif" style="height:22px; width:60px;" alt="スタジオジブリ" name="a08"></a></td>
+			</tr>
+			<tr>
+			<td style="width:60px;"><a href="http://www.ntv.co.jp/ghibli/shuppan/" onmouseover="img_over('a09',8)" onmouseout="img_out('a09',8)"><img src="./images/g_print_down.gif" style="height:22px; width:60px;" alt="スタジオジブリ出版部" name="a09"></a></td>
+			</tr>
+			<tr>
+			<td style="width:60px;"><img src="./images/ghiblilogo_02.gif" style="height:44px; width:60px;" alt="スタジオジブリ"></td>
+			</tr>
+			</tbody></table>
+		</td>
+		<td style="width:18px;" class="cs0"><img src="./images/point.gif" style="height:88px; width:18px;" alt="line"></td>
+		</tr>
+		</tbody></table>
+	</td>
+	</tr>
+	</tbody></table>
+</td>
+</tr>
+</tbody></table>
+<div style="width:96%;" class="r_box4"><span class="txt0e">Copyright &copy; 2004 <a href="http://www.ghibli.jp/" target="_blank">STUDIO GHIBLI</a>. All Rights Reserved.<br>Website Designed by <a href="http://rapha.ac/" target="_blank">Rapha</a>, Inc.</span></div>
+<div><img src="./images/point.gif" style="height:4px; width:720px;" alt="line"></div>
+
+<noscript>
+<div class="box4"><font size="1" color="#dc143c">
+スタジオジブリは２００４年２月、堀田善衞氏の著作の３作品を復刊し、堀田氏が出演した「ＮＨＫ人間大学」などの番組をビデオグラム化します。<br>
+このＷＥＢサイトは、その書籍とビデオグラムを紹介するサイトです。<br>
+現在、JavaScriptがOFF状態です。<br>
+当サイトでは、JavaScriptによりフォントサイズ指定（CSS）等の分岐処理を行っているため、<br>
+JavaScriptがOFF状態では、意図したレイアウトや正常な動作保証はいたしかねます。<br>
+快適にブラウズするためにJavaScriptをONにしてリロードしてください。<br>
+</font></div>
+</noscript>
+</body>
+</html>

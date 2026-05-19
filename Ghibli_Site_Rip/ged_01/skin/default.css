@@ -1,0 +1,828 @@
+@charset "UTF-8";
+
+
+
+/*
+
+name: Rapha 3Column
+
+designer: Shinichi Takai
+
+developer: Rapha Ltd.
+
+developer_url: http://rapha.ac/
+
+*/
+
+
+
+body {
+
+	text-align: center;
+
+	background: #E5E5E5 url(images/body.jpg) repeat-x top left;
+
+	color: #444444;
+
+	font-size: 80%;
+
+	font-family: sans-serif;
+
+}
+
+
+
+h1, h2, h3, h4, h5, h6, .datetime, .postdata, .postinfo, .powered, address, blockquote, abbr, acronym, dfn, p, li, dt, dd, div, th, td {
+
+	font-family: 'メイリオ', 'Meiryo', 'ＭＳ Ｐゴシック', 'ヒラギノ角ゴ Pro W3', 'Hiragino Kaku Gothic Pro', sans-serif;
+
+}
+
+
+
+a:link {
+
+	color: #003399;
+
+	text-decoration: none;
+
+}
+
+a:visited {
+
+	color: #996633;
+
+	text-decoration: none;
+
+}
+
+a:active {
+
+	color: #FF9933;
+
+}
+
+a:hover {
+
+	color: #006699;
+
+	text-decoration: underline;
+
+}
+
+
+
+ul.inline {
+
+	margin: 0;
+
+	padding: 0;
+
+}
+
+
+
+ul.inline li {
+
+	display: inline;
+
+}
+
+
+
+div#container {
+
+	width: 768px;
+
+	margin: 0 auto 0 auto;
+
+	text-align: left;
+
+	background: transparent url(images/container.jpg) repeat-y top center;
+
+}
+
+
+
+div#menu a.menu:link {
+
+	color: #003399;
+
+}
+
+div#menu a.menu:visited {
+
+	color: #003399;
+
+}
+
+div#menu a.menu:active {
+
+	color: #FF9933;
+
+}
+
+div#menu a.menu:hover {
+
+	color: #006699;
+
+	text-decoration: underline;
+
+}
+
+
+
+div#header a.banner {
+
+	font-size: 1px;
+
+	text-indent: -40000em;
+
+	display: block;
+
+	width: 100%;
+
+	height: 40px;
+
+	border: none;
+
+	text-decoration: none;
+
+}
+
+
+
+div#header a.blogbanner {
+
+	font-size: 1px;
+
+	text-indent: -40000em;
+
+	display: block;
+
+	width: 100%;
+
+	height: 138px;
+
+	border: none;
+
+	text-decoration: none;
+
+}
+
+
+
+div#header {
+
+	height: 195px;
+
+	float: none;
+
+	clear: both;
+
+	width: 100%;
+
+	background: transparent url(images/header.jpg) no-repeat top center;
+
+}
+
+
+
+h1 {
+
+	font-size: 140%;
+
+	font-weight: bold;
+
+}
+
+
+
+h1 a {
+
+	color: black;
+
+	font-weight: bold;
+
+}
+
+
+
+h1 a:hover {
+
+	text-decoration: none;
+
+	color: black;
+
+	background-color: transparent;
+
+}
+
+
+
+div#content h2,
+
+div#menu h2,
+
+div#links h2,
+
+div#header p,
+
+p.skip-nav,
+
+hr {
+
+	display: none;
+
+}
+
+
+
+div#main {
+
+	float: left;
+
+	width: 589px;
+
+}
+
+
+
+div#content {
+
+	width: 410px;
+
+	float: right;
+
+}
+
+
+
+div#content div.section {
+
+	margin: 0 0 2em 0;
+
+}
+
+
+
+div#content div.section p {
+
+	padding-left: 5px;
+
+	line-height: 188%;
+
+}
+
+
+
+div#content div.section div.section,
+
+div#content div.section div.section div.section {
+
+	margin: 2em 0 0 0;
+
+}
+
+
+
+div#content div.crumb {
+
+	margin: 0 0 1.2em 0;
+
+}
+
+
+
+div#content div.section blockquote {
+
+	border: 1px solid #312E11;
+
+	background: transparent url(images/blockquote.gif) repeat top left;
+
+	font-size: 90%;
+
+}
+
+
+
+div#content div.section ins {
+
+	border-color: #ACB560;
+
+}
+
+
+
+div#content div.section pre {
+
+	background-color: #E1DEBD;
+
+}
+
+
+
+div#note {
+
+	padding: 0 0 5px 0;
+
+}
+
+
+
+p.extended {
+
+	text-align: right;
+
+}
+
+
+
+ul.postdata {
+
+	margin: 0;
+
+	text-align: right;
+
+	font-size: 90%;
+
+}
+
+
+
+ul.postinfo {
+
+	text-align: right;
+
+	font-size: 90%;
+
+	margin: 1em 0 0 0;
+
+	border-top: 1px dotted black;
+
+}
+
+
+
+ul.postdata li {
+
+	padding: 0;
+
+	margin: 0 0.2em;
+
+}
+
+
+
+ul.postinfo li {
+
+	padding: 0.2em 0 0 0;
+
+	margin: 0 0.2em;
+
+}
+
+
+
+div#content div.section h4 {
+
+	padding-left: 5px;
+
+	margin-bottom: 0.5em;
+
+	font-weight: bold;
+
+	font-size: 110%;
+
+}
+
+
+
+ul.postinput {
+
+	text-align: center;
+
+}
+
+
+
+ul.postinput li {
+
+	margin: 0 0.2em;
+
+}
+
+
+
+div#links {
+
+	float: right;
+
+	width: 179px;
+
+	font-size: 100%;
+
+}
+
+
+
+div#links div.section {
+
+	margin: 0 14px 12px 25px;
+
+}
+
+
+
+div#menu {
+
+	float: left;
+
+	width: 179px;
+
+	font-size: 100%;
+
+}
+
+
+
+div#menu div.section {
+
+	margin: 0 25px 18px 14px;
+
+}
+
+
+
+div#menu div.section img {
+
+	margin: 0 0 0.2em 0.5em;
+
+}
+
+
+
+div#links div.section img {
+
+	margin: 0.2em 0 0.8em 0.5em;
+
+}
+
+
+
+div#menu div.section p,
+
+div#links div.section p {
+
+	margin: 0.2em 0 0 0.5em;
+
+}
+
+
+
+div#menu div.section ul,
+
+div#menu div.section ol,
+
+div#links div.section ul,
+
+div#links div.section ol {
+
+	margin: 0.5em 1em 0.5em 0.5em;
+
+	font-size: 95%;
+
+}
+
+
+
+div#menu div.section li,
+
+div#links div.section li {
+
+	margin:0 0 0.8em 0;
+
+}
+
+
+
+div#menu div.section ul ul,
+
+div#menu div.section ol ol,
+
+div#menu div.section ol ul,
+
+div#links div.section ul ul,
+
+div#links div.section ol ol,
+
+div#links div.section ol ul {
+
+	margin: 0.1em 0 0.1em 1em;
+
+}
+
+
+
+div#menu div.section ul ul li,
+
+div#menu div.section ol ol li,
+
+div#menu div.section ol ul li,
+
+div#links div.section ul ul li,
+
+div#links div.section ol ol li,
+
+div#links div.section ol ul li {
+
+	margin: 0;
+
+}
+
+
+
+div#menu div.section ul,
+
+div#menu div.section ol,
+
+div#links div.section ul,
+
+div#links div.section ol {
+
+	list-style-type: none;
+
+}
+
+
+
+div#content div.section h3 {
+
+	font-weight: bold;
+
+	padding: 4px 0px 4px 5px;
+
+	margin-bottom: 1.2em;
+
+	color: #444444;
+
+	font-size: 120%;
+
+	border-left: 3px solid #d3d09b;
+
+	border-bottom: 1px dotted #d3d09b;
+
+}
+
+
+
+
+
+div#content div.section h3 a {
+
+	color: #444444;
+
+	font-weight: bold;
+
+	text-decoration: none;
+
+}
+
+
+
+div#content div.section h3 a:hover {
+
+	color: #444444;
+
+	font-weight: bold;
+
+	text-decoration: none;
+
+}
+
+
+
+div#menu div.section h3,
+
+div#links div.section h3 {
+
+	font-weight: bold;
+
+	padding-left: 3px;
+
+	margin-bottom: 0.8em;
+
+	color: #444444;
+
+	font-size: 110%;
+
+	border-left: 3px solid #d3d09b;
+
+	border-bottom: 1px dotted #d3d09b;
+
+}
+
+
+
+p.datetime {
+
+	font-weight: bold;
+
+	margin: 0;
+
+	border-left: 3px solid #d3d09b;
+
+	padding-left: 5px;
+
+	font-size: 100%;
+
+}
+
+
+
+p.10log {
+
+	color: #aeaa76;
+
+	font-weight: bold;
+
+	margin: 0;
+
+	border-left: 3px solid #d3d09b;
+
+	padding: 0px 0px 4px 5px;
+
+	font-size: 100%;
+
+}
+
+
+
+p.20making {
+
+	color: #8b9da5;
+
+	font-weight: bold;
+
+	margin: 0;
+
+	border-left: 3px solid #b2c4cc;
+
+	padding: 0px 0px 4px 5px;
+
+	font-size: 100%;
+
+}
+
+
+
+p.making {
+
+	font-weight: bold;
+
+	margin: 0;
+
+	border-left: 3px solid #b2c4cc;
+
+	padding-left: 5px;
+
+	font-size: 100%;
+
+}
+
+
+
+div#content div.section h3.making  {
+
+	font-weight: bold;
+
+	padding: 4px 0px 4px 5px;
+
+	margin-bottom: 1.2em;
+
+	color: #444444;
+
+	font-size: 120%;
+
+	border-left: 3px solid #b2c4cc;
+
+	border-bottom: 1px dotted #b2c4cc;
+
+}
+
+
+
+p.30special {
+
+	color: #c7a2a2;
+
+	font-weight: bold;
+
+	margin: 0;
+
+	border-left: 3px solid #ddafaf;
+
+	padding: 0px 0px 4px 5px;
+
+	font-size: 100%;
+
+}
+
+
+
+p.special {
+
+	font-weight: bold;
+
+	margin: 0;
+
+	border-left: 3px solid #ddafaf;
+
+	padding-left: 5px;
+
+	font-size: 100%;
+
+}
+
+
+
+div#content div.section h3.special  {
+
+	font-weight: bold;
+
+	padding: 4px 0px 4px 5px;
+
+	margin-bottom: 1.2em;
+
+	color: #444444;
+
+	font-size: 120%;
+
+	border-left: 3px solid #ddafaf;
+
+	border-bottom: 1px dotted #ddafaf;
+
+}
+
+
+
+div#recent-entries ol {
+
+	padding-left: 1.0em;
+
+}
+
+
+
+div#recent-entries ol li {
+
+	list-style-type: disc;
+
+}
+
+
+
+ul.entry-nav {
+
+	text-align: center;
+
+	margin: 0 0 1em 0;
+
+}
+
+
+
+ul.entry-nav li {
+
+	margin: 0 0.2em;
+
+}
+
+
+
+div#footer {
+
+	margin: 0;
+
+	text-align: center;
+
+	clear: both;
+
+	height: 48px;
+
+	background: transparent url(images/footer.jpg) no-repeat bottom center;
+
+}
+
+
+
+address {
+
+	padding-top: 12px;
+
+	font-size: 90%;
+
+	text-align: center;
+
+}
+

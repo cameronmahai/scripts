@@ -1,0 +1,72 @@
+$(function() {
+  $(window).load(function(){
+    var currentDate = new Date();
+
+    $('.newmarkList').each(function(){
+      var pass = 14;
+      var newcontent = '<span class="label label-new">New</span> ';
+      var newmarkAttr = $(this).attr('data-entrydate');
+      newmarkAttr = newmarkAttr.replace(/年|月|日/g,':');
+      newmarkAttr = newmarkAttr.replace(/\s/g,'');
+      var time = newmarkAttr.split(":");
+      var entryDate = new Date(time[0], time[1]-1, time[2], time[3], time[4], '00');
+      var now = (currentDate.getTime() - entryDate.getTime())/(24*60*60*1000);
+      now = Math.ceil(now);
+      if(now <= pass){
+        $(this).before(newcontent);
+      }
+    });
+
+    $('.datecell').each(function(){
+      var logAttr = $(this).attr('data-entrylog');
+      if (logAttr == 1) {
+        var latecontent = '<span class="label label-default">巡回予定</span> ';
+        var sooncontent = '<span class="label label-info">近日巡回</span> ';
+        var activecontent = '<span class="label label-blue">巡回中</span> ';
+      } else {
+        var latecontent = '<span class="label label-default">開催予定</span> ';
+        var sooncontent = '<span class="label label-info">近日開催</span> ';
+        var activecontent = '<span class="label label-blue">開催中</span> ';
+      }
+
+      var dateAttr = $(this).text();
+      dateAttr = dateAttr.replace(/[^0-9\-\.]/g,'');
+      var dateArray = dateAttr.split("-");
+      if (!dateArray[0]=='' && !dateArray[1]=='') {
+        var nowTime = currentDate.getTime();
+        var lateTime = currentDate.getTime() + 40*24*60*60*1000;
+        var eventstart = dateArray[0].split("\.");
+        var eventstartDate = new Date(eventstart[0], eventstart[1]-1, eventstart[2], 10, 00, '00');
+        var eventstartTime = eventstartDate.getTime();
+        var eventend = dateArray[1].split("\.");
+        var eventendDate = new Date(eventend[0], eventend[1]-1, eventend[2], 18, 00, '00');
+        var eventendTime = eventendDate.getTime();
+        if(nowTime <= eventendTime){
+          if (lateTime <= eventstartTime){
+            if ($(this).next('.textcell').length) {
+              $(this).next('.textcell').prepend(latecontent);
+            } else if ($(this).prev('h3').length) {
+              $(this).prev('h3').prev('.datelabel').prepend(latecontent);
+            }
+          } else if (nowTime <= eventstartTime){
+            if ($(this).next('.textcell').length) {
+              $(this).next('.textcell').prepend(sooncontent);
+            } else if ($(this).prev('h3').length) {
+              $(this).prev('h3').prev('.datelabel').prepend(sooncontent);
+            }
+          } else {
+            if ($(this).next('.textcell').length) {
+              $(this).next('.textcell').prepend(activecontent);
+            } else if ($(this).prev('h3').length) {
+              $(this).prev('h3').prev('.datelabel').prepend(activecontent);
+            }
+          }
+        }
+      }
+    });
+
+  });
+
+});
+
+

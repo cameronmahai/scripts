@@ -1,0 +1,150 @@
+/*
+ * Globals
+ */
+
+/*
+ * Base structure
+ */
+
+body {
+  background-color: #9c2b2c;
+  background-image: url(../img/bg.gif);
+  background-repeat: repeat;
+  background-position: center;
+  background-size: auto;
+  color: #e3d855;
+  font-family: sans-serif;
+}
+
+
+.font-serif {
+  font-family: 'Noto Serif JP', serif;
+}
+.text-shadow-b {
+  color: #fff;
+  line-height: 1.4;
+  font-weight: 700 !important;
+  text-shadow: 0 0 1px #150f11, 1px 1px 2px #150f11, 1px 1px 2px #150f11;
+}
+
+
+@media (max-width: 576px) {
+  .h4 {
+    font-size: 1.25rem;
+  }
+  .h5 {
+    font-size: 1rem;
+  }
+}
+
+
+
+.border {
+  border: 3px solid #150f11 !important;
+}
+
+a {
+  text-decoration: none;
+}
+
+a:link {
+  color: #fff;
+  text-decoration: none;
+}
+a:visited {
+  color: #fff;
+}
+a:active {
+  color: #e3d855;
+}
+a:hover {
+  color: #e3d855;
+  text-decoration: underline;
+}
+a:hover img {
+  opacity: 0.8;
+  filter: alpha(opacity=80);
+}
+
+
+a.btn-ghibli:link {
+  color: #fff;
+  text-decoration: none;
+}
+a.btn-ghibli:visited {
+  color: #fff;
+}
+a.btn-ghibli:focus {
+  color: #e3d855;
+}
+a.btn-ghibli:hover {
+  color: #e3d855;
+}
+a.btn-ghibli:active {
+  color: #e3d855;
+}
+
+
+.btn-ghibli {
+  background-color: #150f11;
+  text-align: left;
+  border-radius: 7px;
+}
+.btn-ghibli:focus,
+.btn-ghibli.focus {
+  background-color: #530d0e;
+}
+.btn-ghibli:hover {
+  background-color: #530d0e;
+}
+.btn-ghibli:active {
+  background-color: #530d0e;
+}
+
+
+.modal-content {
+  background-color: #181818;
+  color: #fff;
+}
+.modal-header {
+  border-bottom: none;
+}
+.modal-body {
+  padding: 0 3px;
+}
+
+.modal-footer {
+  border-top: none;
+}
+.close {
+  color: #fff;
+}
+
+.close:hover {
+  color: #fff;
+}
+
+
+
+.list-ghibli {
+  border-radius: 0;
+  padding: 0;
+}
+
+.list-ghibli > .list-group-item {
+  border: none;
+  background-color: transparent;
+  padding: .2rem 0;
+}
+
+.list-ghibli > .list-group-item:last-child {
+  border-bottom-width: 0;
+}
+
+footer {
+  background-color: #fff;
+}
+.cooperation {
+  color: #333;
+  font-size: 70%;
+}

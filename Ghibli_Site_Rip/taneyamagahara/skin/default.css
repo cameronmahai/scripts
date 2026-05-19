@@ -1,0 +1,321 @@
+@charset "UTF-8";
+
+/*
+name: Rapha 2Column
+designer: Shinichi Takai
+developer: Rapha Ltd.
+developer_url: http://rapha.ac/
+*/
+
+body {
+	text-align: center;
+	background: #111111;
+	color: #d4d3d5;
+	font-size: 80%;
+	font-family: sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6, .datetime, .postdata, .postinfo, .powered, address, blockquote, abbr, acronym, dfn, p, li, dt, dd, div, th, td {
+	font-family: 'メイリオ', 'Meiryo', 'ＭＳ Ｐゴシック', 'ヒラギノ角ゴ Pro W3', 'Hiragino Kaku Gothic Pro', sans-serif;
+}
+
+a:link {
+	color: #ffffd4;
+	text-decoration: none;
+}
+a:visited {
+	color: #efe2c0;
+	text-decoration: none;
+}
+a:active {
+	color: #f6a863;
+}
+a:hover {
+	color: #f6a863;
+	text-decoration: underline;
+}
+
+ul.inline {
+	margin: 0;
+	padding: 0;
+}
+
+ul.inline li {
+	display: inline;
+}
+
+div#container {
+	width: 990px;
+	margin: 0 auto 0 auto;
+	text-align: left;
+	background: transparent url(images/body.jpg) no-repeat bottom right;
+}
+
+div#header {
+	height: 152px;
+	float: none;
+	clear: both;
+	width: 100%;
+	background: transparent url(images/header.jpg) no-repeat top center;
+}
+
+div#header a.banner {
+	font-size: 1px;
+	text-indent: -40000em;
+	display: block;
+	width: 990px;
+	height: 152px;
+	border: none;
+	text-decoration: none;
+}
+
+h1 {
+	font-size: 1px;
+	text-indent: -40000em;
+	overflow: hidden;
+}
+
+h1 a {
+	color: black;
+	font-weight: bold;
+}
+
+h1 a:hover {
+	text-decoration: none;
+	color: black;
+	background-color: transparent;
+}
+
+p.blog-description {
+	font-size: 1px;
+	text-indent: -40000em;
+}
+
+div#content h2,
+div#menu h2,
+div#links h2,
+p.skip-nav,
+div#notice h2,
+hr {
+	display: none;
+}
+
+div#content {
+	width: 640px;
+	float: left;
+}
+
+div#content div.section {
+	margin: 0 15px 2em 25px;
+}
+
+div#content div.section p {
+	line-height: 188%;
+}
+
+div#content div.section div.section,
+div#content div.section div.section div.section {
+	margin: 2em 0 0 0;
+}
+
+p.datetime {
+	color: #45763e;
+	font-weight: bold;
+	margin: 0 0 0.2em 0;
+	padding: 0;
+}
+
+div#content div.section h3 {
+	font-weight: bold;
+	margin-bottom: 0.5em;
+	color: #FFFFFF;
+	font-size: 125%;
+}
+
+div#content div.section h3 a {
+	color: #FFFFFF;
+	font-weight: bold;
+	text-decoration: none;
+}
+
+div#content div.section h3 a:hover {
+	color: #FFFFFF;
+	font-weight: bold;
+	text-decoration: none;
+}
+
+div#content div.section .trailer {
+	margin: 20px auto 20px auto;
+	width: 480px;
+}
+
+div#content div.section blockquote {
+	border: 1px solid #555555;
+	background: transparent url(images/blockquote.gif) repeat top left;
+	font-size: 100%;
+	word-break: break-all;
+	word-wrap: break-word;
+}
+
+div#content div.section div.qaname {
+	float:left;
+}
+
+div#content div.section div.qatext {
+	padding: 0 0 12px 18px;
+	float:left;
+}
+
+div#content div.section ins {
+	border-color: #ACB560;
+}
+
+div#content div.section pre {
+	background-color: #E1DEBD;
+}
+
+p.extended {
+	text-align: right;
+}
+
+ul.postdata {
+	margin: 0;
+	text-align: right;
+	font-size: 90%;
+}
+
+ul.postinfo {
+	text-align: right;
+	font-size: 90%;
+	margin: 1em 0 0 0;
+	border-top: 1px dotted black;
+}
+
+ul.postdata li {
+	padding: 0;
+	margin: 0 0.2em;
+}
+
+ul.postinfo li {
+	padding: 0.2em 0 0 0;
+	margin: 0 0.2em;
+}
+
+div#content div.section h4 {
+	margin-bottom: 0.5em;
+	font-weight: bold;
+	font-size: 110%;
+}
+
+ul.postinput {
+	text-align: center;
+}
+
+ul.postinput li {
+	margin: 0 0.2em;
+}
+
+div#menu {
+	width: 270px;
+	float: right;
+	font-size: 100%;
+}
+
+div#links {
+	width: 180px;
+	float: right;
+	font-size: 95%;
+	position: relative;
+}
+
+div#menu div.section,
+div#links div.section {
+	margin: 10px 0 10px 12px;
+}
+
+div#menu div.section h3,
+div#links div.section h3 {
+	font-weight: bold;
+	color: #FFFFFF;
+	font-size: 120%;
+	margin: 0 0 18px 0;
+}
+
+div#menu div.section img,
+div#links div.section img {
+	margin: 0.5em 0 0 0.5em;
+}
+
+div#menu div.section p,
+div#links div.section p {
+	margin: 0 0.5em;
+}
+
+div#menu div.section ul,
+div#menu div.section ol,
+div#links div.section ul,
+div#links div.section ol {
+	margin: 0.5em 1em 0.5em 0.5em;
+	font-size: 95%;
+}
+
+div#menu div.section li,
+div#links div.section li {
+	margin:0 0 0.8em 0;
+}
+
+div#menu div.section ul ul,
+div#menu div.section ol ol,
+div#menu div.section ol ul,
+div#links div.section ul ul,
+div#links div.section ol ol,
+div#links div.section ol ul {
+	margin: 0.5em 0em 0.5em 1em;
+}
+
+div#menu div.section ul ul li,
+div#menu div.section ol ol li,
+div#menu div.section ol ul li,
+div#links div.section ul ul li,
+div#links div.section ol ol li,
+div#links div.section ol ul li {
+	margin:0 0 0.4em 0;
+}
+
+div#menu div.section ul,
+div#menu div.section ol,
+div#links div.section ul,
+div#links div.section ol {
+	list-style-type: none;
+}
+
+div#recent-entries ol {
+	padding-left: 0.5em;
+}
+
+div#recent-entries ol li {
+	list-style-type: disc;
+}
+
+ul.entry-nav {
+	text-align: center;
+	margin: 0 0 1em 0;
+}
+
+ul.entry-nav li {
+	font-size: 90%;
+	margin: 0 0.2em;
+}
+
+div#footer {
+	margin: 0;
+	text-align: center;
+	clear: both;
+	height: 340px;
+}
+
+address {
+	padding-top: 300px;
+	font-size: 90%;
+	text-align: center;
+}

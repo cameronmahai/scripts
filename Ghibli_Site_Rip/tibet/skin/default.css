@@ -1,0 +1,611 @@
+@charset "UTF-8";
+
+/*
+name: Rapha 3Column
+designer: Shinichi Takai
+developer: Rapha Ltd.
+developer_url: http://rapha.ac/
+*/
+
+html {
+	background-color: #f3f1e4;
+	background-image: url(images/bg.gif);
+	padding:0px;
+	margin:0px;
+}
+
+body {
+	color: #555555;
+	max-width: 2000px;
+	min-width: 950px;
+	font-size: 90%;
+	font-family: sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6, .datetime, .postdata, .postinfo, .powered, address, blockquote, abbr, acronym, dfn, p, li, dt, dd, div, th, td {
+	font-family: Verdana, 'ＭＳ Ｐゴシック', 'ヒラギノ角ゴ Pro W3', 'HiraKakuPro-W3', Arial, sans-serif;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:link {
+	color: #992529;
+	text-decoration: none;
+}
+a:visited {
+	color: #771E27;
+	text-decoration: none;
+}
+a:active {
+	color: #e9d09a;
+}
+a:hover {
+	color: #eabc58;
+	text-decoration: underline;
+}
+
+ul.inline {
+	margin: 0;
+	padding: 0;
+}
+
+ul.inline li {
+	display: inline;
+}
+
+div#container {
+}
+
+div#menu a.menu {
+	font-weight: bold;
+	font-size: 110%;
+}
+
+div#menu a.menu:link {
+	color: #992529;
+}
+div#menu a.menu:visited {
+	color: #771E27;
+}
+div#menu a.menu:active {
+	color: #e9d09a;
+}
+div#menu a.menu:hover {
+	color: #eabc58;
+	text-decoration: underline;
+}
+
+div#header a.banner {
+	font-size: 1px;
+	text-indent: -40000em;
+	display: block;
+	width: 100%;
+	height: 180px;
+	border: none;
+	text-decoration: none;
+}
+
+div#header {
+	height: 218px;
+	float: none;
+	clear: both;
+	width: 100%;
+	background: transparent url(images/header.jpg) no-repeat top left;
+}
+
+div#header img {
+	position: absolute;
+	top:18px;
+	right:18px;
+}
+
+h1 {
+	background: transparent url(images/h1.gif) no-repeat top right;
+	height: 218px;
+	float: none;
+	clear: both;
+	width: 100%;
+}
+
+h1 a {
+	color: black;
+	font-weight: bold;
+}
+
+h1 a:hover {
+	text-decoration: none;
+	color: black;
+	background-color: transparent;
+}
+
+div#mainbody {
+	margin: 0 auto;
+	width: 950px;
+}
+
+
+div#main {
+	margin: 0 -215px 0 0;
+	float: left;
+	clear: left;
+	width: 100%;
+}
+
+div#content h2,
+div#menu h2,
+div#links h2,
+div#header p,
+p.skip-nav,
+hr {
+	display: none;
+}
+
+div#content {
+	margin: 0 0 0 -215px;
+	float: right;
+	clear: right;
+	width: 100%;
+	color: inherit;
+}
+
+div#content div.section {
+	margin: 0 215px 2em 215px;
+	padding: 0 0 2em 8px;
+	float: none;
+	clear: both;
+	background: transparent url(images/separator.gif) no-repeat bottom center;
+}
+
+div#content div.title {
+	text-align: center;
+	margin: 0 215px 12px 215px;
+	float: none;
+	clear: both;
+}
+
+div#content div.section h3 {
+	font-weight: bold;
+	margin: 0 20px 1.8em 20px;
+	color: #393939;
+	font-size: 125%;
+}
+
+div#content div.section h3 a {
+	color: #393939;
+	font-weight: bold;
+	text-decoration: none;
+}
+
+div#content div.section h3 a:hover {
+	color: #393939;
+	font-weight: bold;
+	text-decoration: none;
+}
+
+div#content div.section h4 {
+	padding-left: 5px;
+	margin: 0 20px 1.2em 20px;
+	font-weight: bold;
+	line-height: 188%;
+	font-size: 110%;
+}
+
+div#content div.section div.list h4 {
+	padding-left: 5px;
+	margin: 0 20px 0 20px;
+	font-weight: bold;
+	line-height: 188%;
+	font-size: 110%;
+}
+
+div#content div.section h5 {
+	padding-left: 5px;
+	margin: 0 20px 1.2em 20px;
+	line-height: 188%;
+	font-size: 110%;
+}
+
+div#content div.section p {
+	margin: 0 20px 0.8em 20px;
+	padding-left: 10px;
+	line-height: 188%;
+}
+
+div#content div.section div.section,
+div#content div.section div.section div.section {
+	margin: 2em 0 2em 0;
+}
+
+div#content div.crumb {
+	margin: 0 0 1.2em 0;
+}
+
+div#content div.section blockquote {
+	border: 1px solid #DDDDDD;
+	background: transparent url(images/blockquote.gif) repeat top left;
+	word-break: break-all;
+	word-wrap: break-word;
+}
+
+div#content div.section blockquote h5 {
+	margin: 0 0 0.4em 0;
+	font-size: 95%;
+}
+
+div#content div.section blockquote p {
+	margin: 0;
+	padding-left: 18px;
+	font-size: 85%;
+	line-height: 188%;
+}
+
+div#content div.section ins {
+	border-color: #ACB560;
+}
+
+div#content div.section pre {
+	background-color: #E1DEBD;
+}
+
+
+div#content div.section div.center {
+	text-align: center;
+}
+
+div#content div.section div.right {
+	padding: 0 30px;
+	text-align: right;
+}
+
+div#content div.section div.extended {
+	padding: 0 30px;
+	text-align: right;
+}
+
+div#content div.section table {
+	margin: auto;
+}
+
+div#content div.section th {
+	font-weight: bold;
+	text-align: left;
+}
+
+div#content div.section td {
+	padding: 0px 4px 24px 4px;
+}
+
+div#content div.section div.block {
+	padding: 0 0 0 30px;
+}
+
+div#content div.section div.rap {
+	display: inline;
+}
+
+div#content div.section div.note {
+	padding: 2px 30px 2px 45px;
+	text-indent:-1em;
+	font-size: 85%;
+}
+
+div#content div.section ul {
+	padding: 0 30px;
+}
+
+div#content div.section li {
+}
+
+
+.float_left {
+	float: left;
+	margin: 4px 12px 0 0;
+}
+
+.float_right {
+	float: right;
+	margin: 4px 18px 0 12px;
+}
+
+a:hover img{
+	opacity:0.8;
+	filter: alpha(opacity=80);
+}
+
+small {
+	font-size: 80%;
+}
+
+.center {
+	text-align: center;
+}
+
+.right {
+	text-align: right;
+}
+
+.top {
+	vertical-align: top;
+}
+
+.middle {
+	vertical-align: middle;
+}
+
+.bottom {
+	vertical-align: bottom;
+}
+
+.extended {
+	text-align: right;
+}
+
+.small {
+	font-size: 80%;
+}
+
+.big {
+	font-size: 110%;
+}
+
+.b {
+	font-weight: bold;
+}
+
+.note {
+	padding-left:1em;
+	text-indent:-1em;
+	line-height: 1.2;
+}
+
+.clear {
+	clear: both;
+}
+
+.nobr {
+	white-space: nowrap;
+}
+
+.hide {
+	color: #FFFFFF;
+}
+
+.sred {
+	vertical-align: super;
+	font-size: 70%;
+	color: #d64042;
+}
+
+ul.postdata {
+	margin: 0;
+	text-align: right;
+	font-size: 90%;
+}
+
+ul.postinfo {
+	text-align: right;
+	font-size: 90%;
+	margin: 1em 0 0 0;
+	border-top: 1px dotted black;
+}
+
+ul.postdata li {
+	padding: 0;
+	margin: 0 0.2em;
+}
+
+ul.postinfo li {
+	padding: 0.2em 0 0 0;
+	margin: 0 0.2em;
+}
+
+div#content div.section dl {
+	margin: 0 20px 2em 20px;
+	padding-left: 5px;
+	line-height: 188%;
+	font-size: 95%;
+}
+
+div#content div.datetime {
+	margin: 0 20px 0.3em 20px;
+	font-weight: bold;
+}
+
+div#content div.listdatetime {
+	margin: 0 0 0.3em 0;
+	font-weight: bold;
+}
+
+div#content div.listtitle {
+	font-weight: bold;
+	text-decoration: none;
+	margin: 0 0 0.5em 0;
+}
+
+ul.postinput {
+	text-align: center;
+}
+
+ul.postinput li {
+	margin: 0 0.2em;
+}
+
+div#links {
+	float: right;
+	clear: right;
+	width: 200px;
+	font-size: 100%;
+}
+
+div#links div.section {
+	margin: 0 0 24px 15px;
+}
+
+div#menu {
+	float: left;
+	clear: left;
+	width: 200px;
+	font-size: 100%;
+}
+
+div#menu div.section {
+	margin: 0 0 24px 24px;
+}
+
+div#menu div.section img {
+	margin: 0 0 0.2em 0;
+}
+
+div#links div.section img {
+	margin: 0 0 0.2em 0;
+}
+
+div#links div.section ul li img {
+	margin: 0;
+}
+
+div#menu div.section p,
+div#links div.section p {
+	font-size: 90%;
+	margin: 0.2em 0 0 0;
+}
+
+div#menu div.section ul,
+div#menu div.section ol,
+div#links div.section ul,
+div#links div.section ol {
+	margin: 0.5em 1em 1.8em 0.2em;
+	font-size: 95%;
+}
+
+div#menu div.section li,
+div#links div.section li {
+	margin:0 0 0.5em 0;
+}
+
+div#menu div.section ul ul,
+div#menu div.section ol ol,
+div#menu div.section ol ul,
+div#links div.section ul ul,
+div#links div.section ol ol,
+div#links div.section ol ul {
+	margin: 0.2em 0 0.5em 0.5em;
+	font-size: 95%;
+}
+
+div#menu div.section ul ul li,
+div#menu div.section ol ol li,
+div#menu div.section ol ul li,
+div#links div.section ul ul li,
+div#links div.section ol ol li,
+div#links div.section ol ul li {
+	margin: 0.3em 0 0 0;
+}
+
+div#menu div.section ul ul li a.menu {
+	font-weight: normal;
+}
+
+div#menu div.section ul ul ul li a.menu {
+	font-weight: normal;
+	font-size: 95%;
+}
+
+div#menu div.section ul,
+div#menu div.section ol,
+div#links div.section ul,
+div#links div.section ol {
+	list-style-type: none;
+}
+
+div#menu div.section h3 {
+	font-weight: bold;
+	margin-bottom: 0.8em;
+	color: #050c09;
+	font-size: 110%;
+}
+
+div#links div.section h3 {
+	font-weight: bold;
+	margin-bottom: 0.4em;
+	color: #050c09;
+	font-size: 110%;
+}
+
+div#menu div.section h4,
+div#links div.section h4 {
+	font-weight: bold;
+	margin-bottom: 0.4em;
+	font-size: 105%;
+}
+
+div#menu div.section div,
+div#links div.section div {
+	font-size: 90%;
+	margin: 0 0 0.8em 0.5em;
+}
+
+div#recent-entries ol {
+	padding-left: 1.0em;
+}
+
+div#recent-entries ol li {
+	list-style-type: disc;
+}
+
+ul.entry-nav {
+	text-align: center;
+}
+
+ul.entry-nav li {
+	font-size: 90%;
+	margin: 0 0.2em;
+}
+
+div#footer {
+	float: none;
+	clear: both;
+	margin: 0;
+	padding: 0;
+	background: transparent;
+	height: 120px;
+	background: transparent url(images/footer.gif) no-repeat bottom left;
+}
+
+div#footer img {
+	margin: 0;
+	padding: 0;
+}
+
+div#footer ul.powered {
+	margin: 0;
+	text-align: center;
+	float: none;
+	clear: both;
+	font-size: 90%;
+}
+
+div#footer ul.powered li {
+	position: relative;
+	top: 12px;
+	padding: 0 0.2em;
+}
+
+div#footer address {
+	color: #000000;
+	margin: 24px 0 0 0;
+	padding: 0;
+	text-align: center;
+	background: transparent;
+}
+
+div#footer div.footer {
+	margin: 0;
+	height: 120px;
+	font-size: 90%;
+	text-align: center;
+	background: transparent url(images/powered.gif) no-repeat bottom right;
+}
+

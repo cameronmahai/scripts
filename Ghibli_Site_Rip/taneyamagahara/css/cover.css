@@ -1,0 +1,144 @@
+/*
+ * Globals
+ */
+
+/*
+ * Base structure
+ */
+
+body {
+  background-color: #293e87;
+  background-image: url(../img/bg.jpg);
+  background-repeat: no-repeat;
+  background-position: 50% 70%;
+  background-size: cover;
+  color: #fff;
+  font-family: sans-serif;
+}
+
+
+a {
+  text-decoration: none;
+}
+
+a:link {
+  color: #fff;
+  text-decoration: none;
+}
+a:visited {
+  color: #fff;
+}
+a:active {
+  color: #e3df02;
+}
+a:hover {
+  color: #e3df02;
+  text-decoration: underline;
+}
+a:hover img {
+  opacity: 0.8;
+  filter: alpha(opacity=80);
+}
+
+
+a.btn-ghibli:link {
+  color: #fff;
+  text-decoration: none;
+}
+a.btn-ghibli:visited {
+  color: #fff;
+}
+a.btn-ghibli:focus {
+  color: #e3df02;
+}
+a.btn-ghibli:hover {
+  color: #e3df02;
+}
+a.btn-ghibli:active {
+  color: #e3df02;
+}
+
+
+.btn-ghibli {
+  background-color: #1f293e;
+  text-align: left;
+  border-radius: 7px;
+  box-shadow: 0 0 7px #fff, 0 0 3px #fff;
+}
+.btn-ghibli:focus,
+.btn-ghibli.focus {
+  background-color: #2e8a98;
+}
+.btn-ghibli:hover {
+  background-color: #2e8a98;
+}
+.btn-ghibli:active {
+  background-color: #2e8a98;
+}
+
+@media (max-width: 576px) {
+  .btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    border-radius: 0.2rem;
+  }
+}
+
+
+
+.modal-content {
+  background-color: #181818;
+  color: #fff;
+}
+.modal-header {
+  border-bottom: none;
+}
+.modal-body {
+  padding: 0 3px;
+}
+
+.modal-footer {
+  border-top: none;
+}
+.close {
+  color: #fff;
+}
+
+.close:hover {
+  color: #fff;
+}
+
+
+
+.list-ghibli {
+  border-radius: 0;
+  padding: 0;
+}
+
+.list-ghibli > .list-group-item {
+  border: none;
+  background-color: transparent;
+  padding: .2rem 0;
+}
+
+.list-ghibli > .list-group-item:last-child {
+  border-bottom-width: 0;
+}
+
+
+.cooperation {
+  font-size: 70%;
+}
+
+.modal-bg {
+  background-image: url(../img/modal-bg.jpg);
+  background-repeat: no-repeat;
+  background-position: right;
+  background-size: cover;
+}
+
+
+.modal-bg p {
+  text-shadow: 0 0 1px #181818, 1px 1px 2px #181818, 1px 1px 3px #181818, 1px 1px 4px #181818;
+}

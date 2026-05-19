@@ -1,0 +1,95 @@
+/*
+ * Ghibli
+ *
+ * Special styles for displaying the icons and their classes in the docs.
+ */
+.bs-docs-header {
+  background-color: #000;
+  background-image: none;
+  filter: none;
+}
+.bs-docs-header h1 {
+  padding: 0;
+  margin: 0;
+  display: inline;
+}
+
+.bs-docs-header .covertext {
+  padding: 15px 0;
+}
+
+
+
+/*
+ * Slideshow
+ *
+ */
+.slide {
+  position: relative;
+  overflow: hidden;
+}
+#slide-ghibli {
+  opacity: 0;
+  background-color: #109CEB;
+}
+.coverbg {
+  z-index: 1;
+  left: 0;
+  top: 0;
+  position: absolute;
+  display: none;
+}
+.cover {
+  z-index: 0;
+}
+.covertext {
+  z-index: 2;
+  position: relative;
+  text-align: left;
+}
+.btn-note {
+  display: inline-block;
+  padding: 6px 12px;
+  margin-bottom: 0;
+  font-size: 14px;
+  font-weight: normal;
+  line-height: 1.42857143;
+  text-align: left;
+  vertical-align: middle;
+  background-image: none;
+}
+
+.menu-btn {
+  padding-left: 15px;
+}
+.btn-note-col {
+  padding-left: 15px;
+}
+@media (min-width: 768px) {
+  .menu-btn {
+    max-width: 320px;
+  }
+  .btn-note-col {
+    padding-left: 5px;
+  }
+  .btn-note {
+     padding: 6px 0;
+  }
+}
+
+/*
+ * Ghibli bar
+ *
+ */
+#headerbottom {
+  position: absolute;
+  z-index: 100;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+}
+
+
+
+
+

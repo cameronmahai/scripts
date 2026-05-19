@@ -76,9 +76,12 @@
         let consciousnesses = [];
         let compHistory = { compatible: 0, incompatible: 0 };
         
-        const TYPE_COLORS = ["#88b378", "#d18a8f"]; 
+        const TYPE_COLORS_FILL = ["rgba(52, 152, 219, 0.9)", "rgba(230, 126, 34, 0.9)"]; // Blue, Orange with opacity
+        const TYPE_COLORS_OUTLINE = ["#3498db", "#e67e22"]; // Opaque Blue, Orange
         const COLOR_COMPATIBLE = "#88b378";
         const COLOR_INCOMPATIBLE = "#d18a8f";
+        const COLOR_BALL_STATIC_OUTLINE = "#5e7a52"; // Darker green
+        const COLOR_BALL_MOVING_OUTLINE = "#a89f32"; // Darker yellow
 
         document.getElementById('pauseBtn').addEventListener('click', (e) => {
             isPaused = !isPaused;
@@ -212,26 +215,47 @@
                     ctx.beginPath();
                     ctx.arc(0, 0, this.zoneRadius, 0, 2 * Math.PI);
                     ctx.restore();
-                    ctx.strokeStyle = TYPE_COLORS[zone.type];
-                    ctx.lineWidth = 3;
+
+                    const otherC = consciousnesses.find(c => c.id !== this.id);
+                    const otherActiveZone = otherC.getActiveZone();
+                    if (otherActiveZone) {
+                        ctx.strokeStyle = (zone.type === otherActiveZone.type) ? "#2ecc71" : "#e74c3c";
+                    } else {
+                        ctx.strokeStyle = TYPE_COLORS_OUTLINE[zone.type];
+                    }
+
+                    ctx.fillStyle = TYPE_COLORS_FILL[zone.type];
+                    ctx.lineWidth = 8;
                     ctx.stroke();
+                    ctx.fill();
                 });
 
                 this.nodes.forEach((node) => {
                     const pos = currentPositions[node.isMoving ? -1 : node.currentZoneIndex] || {x:0, y:0};
                     let x = pos.x, y = pos.y;
+                    let angle = 0;
                     if (node.isMoving) {
                         const start = currentPositions[node.currentZoneIndex];
                         const end = currentPositions[node.targetZoneIndex];
                         x = start.x + (end.x - start.x) * node.progress;
                         y = start.y + (end.y - start.y) * node.progress;
+                        angle = Math.atan2(end.y - start.y, end.x - start.x);
                     }
+                    ctx.save();
+                    ctx.translate(x, y);
+                    if (node.isMoving) ctx.rotate(angle);
+                    
                     ctx.beginPath();
-                    ctx.arc(x, y, this.awarenessRadius, 0, 2 * Math.PI);
-                    ctx.fillStyle = this.zones[node.currentZoneIndex] ? TYPE_COLORS[this.zones[node.currentZoneIndex].type] : '#fff';
+                    // Stretch horizontally when moving
+                    ctx.scale(node.isMoving ? 2 : 1, 1);
+                    ctx.arc(0, 0, this.awarenessRadius, 0, 2 * Math.PI);
+                    
+                    ctx.strokeStyle = node.isMoving ? COLOR_BALL_MOVING_OUTLINE : COLOR_BALL_STATIC_OUTLINE;
+                    ctx.fillStyle = "#f1c40f"; // Yellow always
                     ctx.lineWidth = 4;
                     ctx.stroke();
                     ctx.fill();
+                    ctx.restore();
                 });
             }
 
