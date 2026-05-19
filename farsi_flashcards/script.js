@@ -1,12 +1,23 @@
-// Placeholder dictionary for now, as I don't have a live API endpoint
-const dictionary = [
+// Expanded dictionary
+const baseDictionary = [
     { farsi: "سلام", english: "hello" },
     { farsi: "خداحافظ", english: "goodbye" },
     { farsi: "بله", english: "yes" },
     { farsi: "خیر", english: "no" },
-    { farsi: "ممنون", english: "thank you" }
+    { farsi: "ممنون", english: "thank you" },
+    { farsi: "لطفاً", english: "please" },
+    { farsi: "دوست", english: "friend" },
+    { farsi: "کتاب", english: "book" },
+    { farsi: "آب", english: "water" },
+    { farsi: "غذا", english: "food" },
+    { farsi: "خانواده", english: "family" },
+    { farsi: "خانه", english: "house" },
+    { farsi: "کار", english: "work" },
+    { farsi: "ساعت", english: "clock" },
+    { farsi: "شب", english: "night" }
 ];
 
+let wordQueue = [];
 let currentWord = {};
 let score = 0;
 let strikes = 0;
@@ -18,14 +29,22 @@ const scoreEl = document.getElementById('score');
 const strikesEl = document.getElementById('strikes');
 const submitBtn = document.getElementById('submit-btn');
 
+function resetQueue() {
+    wordQueue = [...baseDictionary].sort(() => Math.random() - 0.5);
+}
+
 function nextWord() {
-    currentWord = dictionary[Math.floor(Math.random() * dictionary.length)];
+    if (wordQueue.length === 0) {
+        resetQueue();
+    }
+    currentWord = wordQueue.pop();
     farsiWordEl.innerText = currentWord.farsi;
     inputEl.value = '';
     feedbackEl.innerText = '';
+    inputEl.focus();
 }
 
-submitBtn.addEventListener('click', () => {
+function checkAnswer() {
     const translation = inputEl.value.trim().toLowerCase();
     if (translation === currentWord.english) {
         score++;
@@ -47,6 +66,16 @@ submitBtn.addEventListener('click', () => {
             setTimeout(nextWord, 2000);
         }
     }
+}
+
+submitBtn.addEventListener('click', checkAnswer);
+
+// Allow Enter key
+inputEl.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+        checkAnswer();
+    }
 });
 
+resetQueue();
 nextWord();
