@@ -4,7 +4,7 @@ let currentWord = {};
 let score = 0;
 let strikes = 0;
 let timerInterval = null;
-let timeLeft = 3000;
+let timeLeft = 5000; // Updated to 5 seconds
 
 const farsiWordEl = document.getElementById('farsi-word');
 const inputEl = document.getElementById('translation-input');
@@ -36,8 +36,8 @@ function resetQueue() {
 
 function startTimer() {
     clearInterval(timerInterval);
-    timeLeft = 3000;
-    timerEl.innerText = "3.00";
+    timeLeft = 5000; // Updated to 5 seconds
+    timerEl.innerText = "5.00"; // Updated to 5 seconds
     timerInterval = setInterval(() => {
         timeLeft -= 10;
         timerEl.innerText = (timeLeft / 1000).toFixed(2);
