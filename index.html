@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>7 Circle Animation</title>
+    <title>7 Shape Animation</title>
     <style>
         body { margin: 0; overflow: hidden; background: #000; }
         canvas { display: block; }
@@ -41,16 +41,17 @@
 
         const numCircles = 7;
         const radius = 150; // Radius of the large circle
-        const circleRadius = 40; // Radius of each hollow circle
+        const circleRadius = 40; // Radius of each hollow shape
         const ballRadius = 15;
 
-        const circles = [];
+        const shapes = [];
         for (let i = 0; i < numCircles; i++) {
             const angle = (i / numCircles) * 2 * Math.PI;
-            circles.push({
+            shapes.push({
                 initialAngle: angle,
                 reactionProgress: 0,
-                holdingTime: 0
+                holdingTime: 0,
+                sides: i === 0 ? 0 : i + 2 // Triangle to Octagon, plus Circle
             });
         }
 
@@ -73,58 +74,75 @@
             };
         }
 
-        function getCirclePosition(circle, rotation) {
-            const angle = circle.initialAngle + rotation;
+        function getShapePosition(shape, rotation) {
+            const angle = shape.initialAngle + rotation;
             return {
                 x: width / 2 + radius * Math.cos(angle),
                 y: height / 2 + radius * Math.sin(angle)
             };
         }
 
+        function drawShape(ctx, x, y, radius, sides) {
+            ctx.beginPath();
+            if (sides === 0) {
+                // Circle
+                ctx.arc(x, y, radius, 0, 2 * Math.PI);
+            } else {
+                // Polygon
+                for (let i = 0; i < sides; i++) {
+                    const angle = (i / sides) * 2 * Math.PI - Math.PI / 2;
+                    const px = x + radius * Math.cos(angle);
+                    const py = y + radius * Math.sin(angle);
+                    if (i === 0) ctx.moveTo(px, py);
+                    else ctx.lineTo(px, py);
+                }
+                ctx.closePath();
+            }
+        }
+
         function draw(rotation) {
             ctx.clearRect(0, 0, width, height);
 
-            // Group balls by circle
-            const ballsOnCircle = {};
+            // Group balls by shape
+            const ballsOnShape = {};
             balls.forEach(ball => {
                 if (!ball.isMoving) {
-                    if (!ballsOnCircle[ball.currentCircleIndex]) {
-                        ballsOnCircle[ball.currentCircleIndex] = [];
+                    if (!ballsOnShape[ball.currentCircleIndex]) {
+                        ballsOnShape[ball.currentCircleIndex] = [];
                     }
-                    ballsOnCircle[ball.currentCircleIndex].push(ball);
+                    ballsOnShape[ball.currentCircleIndex].push(ball);
                 }
             });
 
             // Update holding time
-            circles.forEach((circle, index) => {
-                if (ballsOnCircle[index]) {
-                    circle.holdingTime += 0.01;
+            shapes.forEach((shape, index) => {
+                if (ballsOnShape[index]) {
+                    shape.holdingTime += 0.01;
                 } else {
-                    circle.holdingTime = 0;
+                    shape.holdingTime = 0;
                 }
             });
 
-            // Recalculate circle positions based on rotation
-            const currentPositions = circles.map(c => getCirclePosition(c, rotation));
+            // Recalculate shape positions based on rotation
+            const currentPositions = shapes.map(c => getShapePosition(c, rotation));
 
-            // Draw hollow circles
+            // Draw hollow shapes
             currentPositions.forEach((pos, i) => {
-                const circle = circles[i];
-                const ballCount = ballsOnCircle[i] ? ballsOnCircle[i].length : 0;
+                const shape = shapes[i];
+                const ballCount = ballsOnShape[i] ? ballsOnShape[i].length : 0;
                 
                 // Reaction effect
                 let scale = 1;
-                if (circle.reactionProgress > 0) {
-                    scale = 1 + Math.sin(circle.reactionProgress * Math.PI) * 0.3;
-                    circle.reactionProgress -= 0.05;
-                    if (circle.reactionProgress < 0) circle.reactionProgress = 0;
+                if (shape.reactionProgress > 0) {
+                    scale = 1 + Math.sin(shape.reactionProgress * Math.PI) * 0.3;
+                    shape.reactionProgress -= 0.05;
+                    if (shape.reactionProgress < 0) shape.reactionProgress = 0;
                 }
                 
                 // Hot Potato
-                scale += circle.holdingTime * 0.3;
+                scale += shape.holdingTime * 0.3;
 
-                ctx.beginPath();
-                ctx.arc(pos.x, pos.y, circleRadius * scale, 0, 2 * Math.PI);
+                drawShape(ctx, pos.x, pos.y, circleRadius * scale, shape.sides);
                 
                 // Color based on ball count
                 if (ballCount >= 3) {
@@ -156,7 +174,7 @@
                     angleToTarget = Math.atan2(end.y - start.y, end.x - start.x);
                 } else {
                     const pos = currentPositions[ball.currentCircleIndex];
-                    const group = ballsOnCircle[ball.currentCircleIndex];
+                    const group = ballsOnShape[ball.currentCircleIndex];
                     const idx = group.indexOf(ball);
                     const count = group.length;
 
@@ -208,7 +226,7 @@
                         ball.progress = 0;
                         ball.currentCircleIndex = ball.targetCircleIndex;
                         
-                        circles[ball.currentCircleIndex].reactionProgress = 1;
+                        shapes[ball.currentCircleIndex].reactionProgress = 1;
                         
                         let nextTarget;
                         do {
