@@ -97,7 +97,6 @@
                 this.awarenessRadius = 10;
                 this.numZones = 7;
                 this.zones = [];
-                // Memory: map type to status (1=comp, -1=incomp, 0=unknown)
                 this.memory = {0: 0, 1: 0}; 
                 for (let i = 0; i < this.numZones; i++) {
                     this.zones.push({ 
@@ -126,11 +125,11 @@
                 const weights = this.zones.map((z, i) => {
                     if (i === current) return 0;
                     let weight = 1;
-                    // Bias based on learned compatibility
                     const mem = this.memory[z.type];
-                    if (mem > 0) weight += adapt * 5; // Stronger bias
-                    if (mem < 0) weight -= adapt * 0.8; // Bias against
-                    return Math.max(0.1, weight);
+                    // Stronger bias
+                    if (mem > 0) weight = 1 + (adapt * 50); 
+                    else if (mem < 0) weight = Math.max(0.01, 1 - (adapt * 0.99));
+                    return weight;
                 });
                 
                 const totalWeight = weights.reduce((a, b) => a + b, 0);
@@ -266,7 +265,6 @@
             const z1 = consciousnesses[0].getActiveZone();
             const z2 = consciousnesses[1].getActiveZone();
             
-            // Debug Memory UI
             memUI1.innerText = `Memory: [${consciousnesses[0].memory[0]}, ${consciousnesses[0].memory[1]}]`;
             memUI2.innerText = `Memory: [${consciousnesses[1].memory[0]}, ${consciousnesses[1].memory[1]}]`;
             
