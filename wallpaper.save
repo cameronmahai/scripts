@@ -1,0 +1,1 @@
+awww img "/home/crum/Pictures/$1" --transition-fps 165 --transition-step 255 --transition-type outer

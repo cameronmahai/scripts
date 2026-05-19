@@ -1,0 +1,84 @@
+#!/bin/bash
+
+# Sleep for a second to let awww boot up on startup
+sleep 0.25
+
+#-----change wallpaper---------#
+
+# Create array from image directory (currently miyazaki stills)
+pictures=(/home/crum/www.ghibli.jp/gallery/*)
+
+# Get a random index
+random_index=$(( RANDOM % ${#pictures[@]} ))
+
+# Use random index to select an image
+random_image="${pictures[$random_index]}"
+
+# Log wallpaper change
+echo "Selected image: $random_image $(date '+%Y-%m-%d %H:%M:%S')" >> ~/scripts/wallpaper_changes.log
+
+# Run awww to change wallpaper
+awww img "$random_image" --transition-fps 165 --transition-step 255 --transition-type random
+
+#notify-send "wallpaper changed!"
+
+#-------Change Theme-----------#
+
+#Run pywal to pull colors and put in cache, but suppress any actual changes for now
+wal -i $random_image -n -s -t -e 
+
+#Assign variables to pywal colors
+bg_color=$(awk 'NR==1' ~/.cache/wal/colors)
+echo "bg color is: " $bg_color
+
+accent_color=$(awk 'NR==3' ~/.cache/wal/colors)
+echo "accent color is: " $accent_color
+
+text_color=$(awk 'NR==16' ~/.cache/wal/colors)
+echo "text color is: " $text_color
+
+addl_color_3=$(awk 'NR==2' ~/.cache/wal/colors)
+addl_color_4=$(awk 'NR==4' ~/.cache/wal/colors)
+addl_color_5=$(awk 'NR==5' ~/.cache/wal/colors)
+addl_color_6=$(awk 'NR==6' ~/.cache/wal/colors)
+addl_color_7=$(awk 'NR==7' ~/.cache/wal/colors)
+
+# Error handling -- check if any variables are empty
+if [ -z "$bg_color" ] || [ -z "$accent_color" ] || [ -z "$text_color" ]; then
+    echo "Error: One or more color variables are empty. Aborting to prevent config corruption."
+    exit 1
+fi
+
+# Update kitty config
+sed -i "s/^background .*$/background $bg_color/g" /home/crum/.config/kitty/theme.conf
+sed -i "s/^cursor .*$/cursor $accent_color/g" /home/crum/.config/kitty/theme.conf
+sed -i "s/^foreground .*$/foreground $text_color/g" /home/crum/.config/kitty/theme.conf
+
+sed -i "s/^color0 .*$/color0 $bg_color/g" /home/crum/.config/kitty/theme.conf
+sed -i "s/^color1 .*$/color1 $accent_color/g" /home/crum/.config/kitty/theme.conf
+sed -i "s/^color2 .*$/color2 $text_color/g" /home/crum/.config/kitty/theme.conf
+sed -i "s/^color3 .*$/color3 $addl_color_3/g" /home/crum/.config/kitty/theme.conf
+sed -i "s/^color4 .*$/color4 $addl_color_4/g" /home/crum/.config/kitty/theme.conf
+sed -i "s/^color5 .*$/color5 $addl_color_5/g" /home/crum/.config/kitty/theme.conf
+sed -i "s/^color6 .*$/color6 $addl_color_6/g" /home/crum/.config/kitty/theme.conf
+sed -i "s/^color7 .*$/color7 $addl_color_7/g" /home/crum/.config/kitty/theme.conf
+
+# Reboot kitty
+pkill -USR1 kitty
+
+# Update wofi config
+sed -i "s|^@define-color bg-color .*$|@define-color bg-color $bg_color;|g" /home/crum/.config/wofi/style.css
+sed -i "s|^@define-color accent-color .*$|@define-color accent-color $accent_color;|g" /home/crum/.config/wofi/style.css
+sed -i "s|^@define-color text-color .*$|@define-color text-color $text_color;|g" /home/crum/.config/wofi/style.css
+
+# Update waybar config
+sed -i "s|^@define-color bg-color .*$|@define-color bg-color $bg_color;|g" /home/crum/.config/waybar/style.css
+sed -i "s|^@define-color accent-color .*$|@define-color accent-color $accent_color;|g" /home/crum/.config/waybar/style.css
+sed -i "s|^@define-color text-color .*$|@define-color text-color $text_color;|g" /home/crum/.config/waybar/style.css
+
+# Reboot waybar
+pkill -SIGUSR2 waybar
+
+
+
+

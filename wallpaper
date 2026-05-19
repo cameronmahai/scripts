@@ -1,0 +1,97 @@
+#!/bin/bash
+
+# Sleep for a second to let awww boot up on startup
+sleep 0.25
+
+#-----change wallpaper---------#
+
+# Create array from image directory
+pictures=(/home/crum/www.ghibli.jp/gallery/*)
+
+# Get a random index
+random_index=$(( RANDOM % ${#pictures[@]} ))
+
+# Use random index to select an image
+random_image="${pictures[$random_index]}"
+
+# Log wallpaper change
+echo "Selected image: $random_image $(date '+%Y-%m-%d %H:%M:%S')" >> ~/scripts/wallpaper_changes.log
+
+# Run awww to change wallpaper
+awww img "$random_image" --transition-fps 165 --transition-step 255 --transition-type random --transition-duration 1.5
+
+#notify-send "wallpaper changed!"
+
+#-------Change Theme-----------#
+
+#Run pywal to pull colors and put in cache, but suppress any actual changes for now
+wal -i $random_image -n -s -t -e 
+
+#Assign variables to pywal colors
+
+color_dir="$HOME/.cache/wal/colors"
+
+bg_color=$(awk 'NR==1' $color_dir)
+echo "bg color is: " $bg_color
+
+accent_color=$(awk 'NR==3' $color_dir)
+echo "accent color is: " $accent_color
+
+text_color=$(awk 'NR==16' $color_dir)
+echo "text color is: " $text_color
+
+addl_color_3=$(awk 'NR==2' $color_dir)
+addl_color_4=$(awk 'NR==4' $color_dir)
+addl_color_5=$(awk 'NR==5' $color_dir)
+addl_color_6=$(awk 'NR==6' $color_dir)
+addl_color_7=$(awk 'NR==7' $color_dir)
+
+# Error handling -- check if any variables are empty
+if [ -z "$bg_color" ] || [ -z "$accent_color" ] || [ -z "$text_color" ]; then
+    echo "Error: One or more color variables are empty. Aborting to prevent config corruption."
+    exit 1
+fi
+
+# Update kitty config
+
+kitty_config_dir="$HOME/.config/kitty/theme.conf"
+
+sed -i "s/^background .*$/background $bg_color/g" $kitty_config_dir
+sed -i "s/^cursor .*$/cursor $accent_color/g" $kitty_config_dir
+sed -i "s/^foreground .*$/foreground $text_color/g" $kitty_config_dir
+
+sed -i "s/^color0 .*$/color0 $bg_color/g" $kitty_config_dir
+sed -i "s/^color1 .*$/color1 $accent_color/g" $kitty_config_dir
+sed -i "s/^color2 .*$/color2 $text_color/g" $kitty_config_dir
+
+sed -i "s/^color3 .*$/color3 $addl_color_3/g" $kitty_config_dir
+sed -i "s/^color4 .*$/color4 $addl_color_4/g" $kitty_config_dir
+sed -i "s/^color5 .*$/color5 $addl_color_5/g" $kitty_config_dir
+sed -i "s/^color6 .*$/color6 $addl_color_6/g" $kitty_config_dir
+sed -i "s/^color7 .*$/color7 $addl_color_7/g" $kitty_config_dir
+
+# Reboot kitty
+pkill -USR1 kitty
+
+# Update wofi config
+
+wofi_config_dir="$HOME/.config/wofi/style.css"
+
+sed -i "s|^@define-color bg-color .*$|@define-color bg-color $bg_color;|g" $wofi_config_dir
+sed -i "s|^@define-color accent-color .*$|@define-color accent-color $accent_color;|g" $wofi_config_dir
+sed -i "s|^@define-color text-color .*$|@define-color text-color $text_color;|g" $wofi_config_dir
+
+# Update waybar config
+
+waybar_config_dir="$HOME/.config/waybar/style.css"
+
+sed -i "s|^@define-color bg-color .*$|@define-color bg-color $bg_color;|g" $waybar_config_dir
+sed -i "s|^@define-color accent-color .*$|@define-color accent-color $accent_color;|g" $waybar_config_dir
+sed -i "s|^@define-color text-color .*$|@define-color text-color $text_color;|g" $waybar_config_dir
+
+# Reboot waybar
+pkill -SIGUSR2 waybar
+
+
+
+

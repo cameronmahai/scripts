@@ -1,0 +1,235 @@
+#!/usr/bin/env bash
+# gemini-wallpaper-attempt
+# Optimized and robust version of kitty-wallpaper-theme.sh
+# Generates a Kitty terminal theme from the current wallpaper.
+
+set -euo pipefail
+
+# ─────────────────────────────────────────────
+# CONFIG
+# ─────────────────────────────────────────────
+KITTY_CONF="${KITTY_CONF:-$HOME/.config/kitty/kitty.conf}"
+THEME_CONF="${THEME_CONF:-$HOME/.config/kitty/wallpaper-theme.conf}"
+NUM_COLORS="${NUM_COLORS:-64}"
+SAMPLE_SIZE="${SAMPLE_SIZE:-300}"
+
+# ─────────────────────────────────────────────
+# UTILS
+# ─────────────────────────────────────────────
+info() { echo -e "\e[34m[INFO]\e[0m $*" >&2; }
+warn() { echo -e "\e[33m[WARN]\e[0m $*" >&2; }
+die()  { echo -e "\e[31m[ERROR]\e[0m $*" >&2; exit 1; }
+
+# Determine the best ImageMagick command
+if command -v magick &>/dev/null; then
+    IM_CONVERT="magick"
+elif command -v convert &>/dev/null; then
+    IM_CONVERT="convert"
+else
+    die "ImageMagick (convert or magick) is required."
+fi
+
+# ─────────────────────────────────────────────
+# WALLPAPER DETECTION
+# ─────────────────────────────────────────────
+detect_wallpaper() {
+    local wp=""
+
+    # 1. swww (Wayland)
+    if command -v swww &>/dev/null; then
+        wp=$(swww query 2>/dev/null | grep -oP '(?<=image: ).*' | head -1 || true)
+        [[ -f "$wp" ]] && { echo "$wp"; return; }
+    fi
+
+    # 2. KDE Plasma
+    if [[ "${XDG_CURRENT_DESKTOP:-}" == "KDE" ]] && command -v qdbus &>/dev/null; then
+        wp=$(qdbus org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript \
+            "var allDesktops = desktops();
+            for (var i = 0; i < allDesktops.length; i++) {
+                var d = allDesktops[i];
+                print(d.currentConfigGroup = Array('Wallpaper', 'org.kde.image', 'General');
+                print(d.readConfig('Image')));
+            }" 2>/dev/null | grep -E "^/" | head -1 || true)
+        [[ -f "$wp" ]] && { echo "$wp"; return; }
+    fi
+
+    # 3. GNOME / Cinnamon / MATE
+    if command -v gsettings &>/dev/null; then
+        for schema in "org.gnome.desktop.background" "org.cinnamon.desktop.background" "org.mate.background"; do
+            wp=$(gsettings get "$schema" picture-uri 2>/dev/null | tr -d "'" | sed "s|file://||" || true)
+            [[ -f "$wp" ]] && { echo "$wp"; return; }
+            # Try dark mode variant
+            wp=$(gsettings get "$schema" picture-uri-dark 2>/dev/null | tr -d "'" | sed "s|file://||" || true)
+            [[ -f "$wp" ]] && { echo "$wp"; return; }
+        done
+    fi
+
+    # 4. feh (X11)
+    if [[ -f "$HOME/.fehbg" ]]; then
+        wp=$(grep -oP "(?<=')([^']+\.(?:png|jpg|jpeg|webp|bmp))" "$HOME/.fehbg" | head -1 || true)
+        [[ -f "$wp" ]] && { echo "$wp"; return; }
+    fi
+
+    # 5. hyprpaper
+    if command -v hyprctl &>/dev/null; then
+        wp=$(hyprctl hyprpaper listactive 2>/dev/null | grep -oP '(?<== ).*' | head -1 || true)
+        [[ -f "$wp" ]] && { echo "$wp"; return; }
+    fi
+
+    # 6. xfconf-query (XFCE)
+    if command -v xfconf-query &>/dev/null; then
+        local prop
+        prop=$(xfconf-query -c xfce4-desktop -p /backdrop -l 2>/dev/null | grep -E "last-image$" | head -1 || true)
+        if [[ -n "$prop" ]]; then
+            wp=$(xfconf-query -c xfce4-desktop -p "$prop" 2>/dev/null || true)
+            [[ -f "$wp" ]] && { echo "$wp"; return; }
+        fi
+    fi
+
+    echo ""
+}
+
+# ─────────────────────────────────────────────
+# CORE LOGIC (AWK POWERED)
+# ─────────────────────────────────────────────
+# This single AWK script replaces dozens of shell function calls and subshells.
+# It processes the raw hex palette and calculates all theme variables in one pass.
+process_theme() {
+    local -a palette=("$@")
+    printf '%s\n' "${palette[@]}" | awk -v date_str="$(date '+%Y-%m-%d %H:%M:%S')" '
+    function hex2rgb(hex,   r,g,b) {
+        sub(/^#/, "", hex)
+        r = strtonum("0x" substr(hex,1,2))
+        g = strtonum("0x" substr(hex,3,2))
+        b = strtonum("0x" substr(hex,5,2))
+        return r " " g " " b
+    }
+    function lum(r,g,b) { return (r * 299 + g * 587 + b * 114) / 1000 }
+    function adjust(hex, pct,    rgb,r,g,b) {
+        split(hex2rgb(hex), rgb)
+        r = rgb[1] + pct * 2.55; g = rgb[2] + pct * 2.55; b = rgb[3] + pct * 2.55
+        r = (r<0?0:(r>255?255:r)); g = (g<0?0:(g>255?255:g)); b = (b<0?0:(b>255?255:b))
+        return sprintf("#%02x%02x%02x", r, g, b)
+    }
+    function rgb2hsl(r,g,b,   h,s,l,max,min,d) {
+        r /= 255; g /= 255; b /= 255
+        max = (r>g?(r>b?r:b):(g>b?g:b)); min = (r<g?(r<b?r:b):(g<b?g:b))
+        l = (max + min) / 2
+        if (max == min) { h = s = 0 }
+        else {
+            d = max - min
+            s = l > 0.5 ? d / (2 - max - min) : d / (max + min)
+            if      (max == r) h = (g - b) / d + (g < b ? 6 : 0)
+            else if (max == g) h = (b - r) / d + 2
+            else               h = (r - g) / d + 4
+            h *= 60
+        }
+        return int(h) " " int(s*100) " " int(l*100)
+    }
+    function hue_dist(a, b,   d) {
+        d = (a - b + 360) % 360
+        return (d > 180 ? 360 - d : d)
+    }
+
+    {
+        hex = toupper($0)
+        split(hex2rgb(hex), rgb)
+        l = lum(rgb[1], rgb[2], rgb[3])
+        split(rgb2hsl(rgb[1], rgb[2], rgb[3]), hsl)
+        
+        # Store data
+        colors[NR] = hex
+        lums[NR] = l
+        hues[NR] = hsl[1]; sats[NR] = hsl[2]; lights[NR] = hsl[3]
+    }
+
+    END {
+        # Find BG (darkest) and FG (brightest)
+        min_l = 999; max_l = -1
+        for (i=1; i<=NR; i++) {
+            if (lums[i] < min_l) { min_l = lums[i]; bg_idx = i }
+            if (lums[i] > max_l) { max_l = lums[i]; fg_idx = i }
+        }
+        
+        bg_orig = colors[bg_idx]
+        fg_orig = colors[fg_idx]
+        
+        is_dark = (min_l < 128)
+        if (is_dark) {
+            bg = adjust(bg_orig, -10); fg = adjust(fg_orig, 15)
+        } else {
+            bg = adjust(bg_orig, 10);  fg = adjust(fg_orig, -15)
+        }
+
+        # Targets for ANSI 1-6
+        # Red, Green, Yellow, Blue, Magenta, Cyan
+        targets[1]=0; targets[2]=120; targets[3]=60; targets[4]=220; targets[5]=300; targets[6]=180
+        
+        for (t=1; t<=6; t++) {
+            best_d = 999; best_idx = 1
+            for (i=1; i<=NR; i++) {
+                if (sats[i] < 15 || lights[i] < 15 || lights[i] > 85) continue
+                d = hue_dist(hues[i], targets[t])
+                if (d < best_d) { best_d = d; best_idx = i }
+            }
+            ansi[t] = colors[best_idx]
+        }
+
+        # Black (color0) and White (color7)
+        ansi[0] = adjust(bg_orig, (is_dark ? -5 : 5))
+        ansi[7] = adjust(fg_orig, (is_dark ? 5 : -5))
+
+        # Output the Kitty config
+        print "# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        print "# Generated: " date_str
+        print "# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        print "background            " bg
+        print "foreground            " fg
+        print "selection_background  " ansi[4]
+        print "selection_foreground  " fg
+        print "cursor                " ansi[3]
+        
+        for (i=0; i<=7; i++) printf "color%-16d %s\n", i, ansi[i]
+        for (i=0; i<=7; i++) printf "color%-16d %s\n", i+8, adjust(ansi[i], 20)
+    }'
+}
+
+# ─────────────────────────────────────────────
+# MAIN
+# ─────────────────────────────────────────────
+main() {
+    local wp="${1:-}"
+    [[ -z "$wp" ]] && wp=$(detect_wallpaper)
+    [[ -z "$wp" ]] && die "Could not detect wallpaper. Please provide a path."
+    [[ -f "$wp" ]] || die "File not found: $wp"
+
+    info "Using wallpaper: $wp"
+
+    # Extract palette
+    local palette
+    palette=$($IM_CONVERT "$wp" -resize "${SAMPLE_SIZE}x${SAMPLE_SIZE}^" \
+        -gravity center -extent "${SAMPLE_SIZE}x${SAMPLE_SIZE}" \
+        +dither -colors "$NUM_COLORS" -format "%c" histogram:info:- 2>/dev/null \
+        | grep -oP '#[0-9A-Fa-f]{6}' | sort -u || true)
+
+    [[ -z "$palette" ]] && die "Failed to extract colors."
+
+    info "Building theme..."
+    mkdir -p "$(dirname "$THEME_CONF")"
+    process_theme $palette > "$THEME_CONF"
+
+    # Ensure include in kitty.conf
+    if [[ -f "$KITTY_CONF" ]] && ! grep -q "include wallpaper-theme.conf" "$KITTY_CONF"; then
+        echo -e "\ninclude wallpaper-theme.conf" >> "$KITTY_CONF"
+        info "Added include to $KITTY_CONF"
+    fi
+
+    # Reload Kitty
+    if pgrep -x kitty &>/dev/null; then
+        kill -SIGUSR1 $(pgrep -x kitty | head -1) && info "Kitty reloaded."
+    fi
+
+    info "Done! Theme saved to $THEME_CONF"
+}
+
+main "$@"

@@ -1,0 +1,13 @@
+(defpoll satellite_image :interval "1h" :initial "/tmp/satellite.png" "/home/crum/scripts/refresh_satellite.sh && echo '/tmp/satellite.png'")
+
+(defwidget satellite []
+  (box :class "satellite-box"
+    (image :path satellite_image
+           :image-width 450
+           :image-height 450)))
+
+(defwindow satellite_window
+  :monitor 0
+  :geometry (geometry :x "20px" :y "20px" :width "450px" :height "450px" :anchor "top right")
+  :stacking "bg"
+  (satellite))
