@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inner Mind Animation</title>
     <style>
-        body { margin: 0; overflow: hidden; background: #000; }
+        body { margin: 0; overflow: hidden; background: #2c3e50; } /* Soft dark pastel blue/gray */
         canvas { display: block; }
         #controls {
             position: absolute;
@@ -94,7 +94,6 @@
             const segments = 32;
             for (let i = 0; i <= segments; i++) {
                 const angle = (i / segments) * 2 * Math.PI;
-                // Deform based on a simple elliptical squash-and-stretch
                 const r = radius * (1 + Math.sin(angle * 2) * deformation * 0.2);
                 const px = x + r * Math.cos(angle);
                 const py = y + r * Math.sin(angle);
@@ -126,11 +125,9 @@
                 const count = nodes.length;
                 const zone = zones[i];
                 
-                // Update deformation
                 if (zone.deformation > 0) zone.deformation -= 0.05;
                 if (zone.deformation < 0) zone.deformation = 0;
 
-                // Vibration (agitation) - Only when not paused
                 const vibration = (!isPaused && count > 1) ? (Math.random() - 0.5) * count * 4 : 0;
 
                 const pulseIntensity = 1 + count * 0.3;
@@ -138,8 +135,8 @@
 
                 drawMembraneCircle(ctx, pos.x + vibration, pos.y + vibration, zoneRadius * finalScale, zone.deformation);
                 
-                ctx.strokeStyle = count >= 3 ? '#f00' : count === 2 ? '#ff0' : count === 1 ? '#0f0' : '#fff';
-                ctx.lineWidth = 2 * finalScale;
+                ctx.strokeStyle = count >= 3 ? '#ff6b6b' : count === 2 ? '#f1c40f' : count === 1 ? '#2ecc71' : '#ecf0f1';
+                ctx.lineWidth = 3 * finalScale;
                 ctx.stroke();
             });
 
@@ -171,14 +168,14 @@
                 ctx.beginPath();
                 if (isStretched) {
                     ctx.ellipse(x, y, awarenessRadius * 1.5, awarenessRadius, angleToTarget, 0, 2 * Math.PI);
-                    ctx.fillStyle = '#ff0';
-                    ctx.strokeStyle = '#b8860b'; // Darker gold
+                    ctx.fillStyle = '#f1c40f'; // Yellow
+                    ctx.strokeStyle = '#a1880a'; // Darker gold
                 } else {
                     ctx.arc(x, y, awarenessRadius, 0, 2 * Math.PI);
-                    ctx.fillStyle = '#0f0';
-                    ctx.strokeStyle = '#006400'; // Dark green
+                    ctx.fillStyle = '#2ecc71'; // Green
+                    ctx.strokeStyle = '#1e8449'; // Darker green
                 }
-                ctx.lineWidth = 2;
+                ctx.lineWidth = 4; // Stronger outline
                 ctx.stroke();
                 ctx.fill();
             });
@@ -207,7 +204,6 @@
                         node.progress += dt / speed;
                         if (node.progress >= 1) {
                             node.progress = 0;
-                            // Trigger membrane deformation upon arrival
                             zones[node.targetZoneIndex].deformation = 1;
                             
                             node.currentZoneIndex = node.targetZoneIndex;
