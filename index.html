@@ -43,6 +43,7 @@
         const radius = 150; // Radius of the large circle
         const circleRadius = 40; // Radius of each hollow circle
         const ballRadius = 15;
+        const circleColors = ['#f00', '#0f0', '#00f', '#ff0', '#f0f', '#0ff', '#ffa500'];
 
         const circles = [];
         for (let i = 0; i < numCircles; i++) {
@@ -132,7 +133,7 @@
                 } else if (ballCount === 2) {
                     ctx.strokeStyle = '#ff0'; // Yellow
                 } else {
-                    ctx.strokeStyle = '#fff'; // White
+                    ctx.strokeStyle = circleColors[i]; // Unique color for circle
                 }
                 
                 ctx.lineWidth = 3 * scale;
