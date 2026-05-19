@@ -59,6 +59,8 @@
         let width, height;
         let isPaused = false;
         let lastTime = performance.now();
+        
+        let compHistory = { compatible: 0, incompatible: 0 };
 
         document.getElementById('pauseBtn').addEventListener('click', (e) => {
             isPaused = !isPaused;
@@ -83,7 +85,6 @@
                 this.numZones = 7;
                 this.zones = [];
                 for (let i = 0; i < this.numZones; i++) {
-                    // Assign a random 'type' to each zone (0-6)
                     this.zones.push({ 
                         initialAngle: (i / this.numZones) * 2 * Math.PI, 
                         impactPhase: 0, 
@@ -96,7 +97,6 @@
                 this.totalRotation = 0;
             }
 
-            // ... (createNode, getWeightedNextZone, getZonePosition methods same as before)
             createNode() {
                 const current = Math.floor(Math.random() * this.numZones);
                 return {
@@ -242,9 +242,7 @@
                 });
             }
 
-            // Helper to get active zone type
             getActiveZoneType() {
-                // Return type of the first zone occupied, or null
                 for (let i = 0; i < this.numZones; i++) {
                     const nodesInZone = this.nodes.filter(n => !n.isMoving && n.currentZoneIndex === i);
                     if (nodesInZone.length > 0) return this.zones[i].type;
@@ -266,10 +264,36 @@
                 compUI.innerText = "Status: Calculating...";
                 return;
             }
-            // 50/50 compatibility: simple modulo check
             const compatible = (type1 + type2) % 2 === 0;
             compUI.innerText = compatible ? "Status: Compatible" : "Status: Incompatible";
             compUI.style.color = compatible ? "#2ecc71" : "#ff6b6b";
+            
+            // Track history
+            compHistory[compatible ? 'compatible' : 'incompatible']++;
+        }
+
+        function drawPieChart() {
+            const total = compHistory.compatible + compHistory.incompatible;
+            if (total === 0) return;
+            
+            const centerX = width - 100;
+            const centerY = height - 100;
+            const radius = 50;
+            const compAngle = (compHistory.compatible / total) * 2 * Math.PI;
+            
+            // Compatible slice
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY);
+            ctx.arc(centerX, centerY, radius, 0, compAngle);
+            ctx.fillStyle = "#2ecc71";
+            ctx.fill();
+            
+            // Incompatible slice
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY);
+            ctx.arc(centerX, centerY, radius, compAngle, 2 * Math.PI);
+            ctx.fillStyle = "#ff6b6b";
+            ctx.fill();
         }
 
         let runningTime = 0;
@@ -284,6 +308,7 @@
             }
             ctx.clearRect(0, 0, width, height);
             consciousnesses.forEach(c => c.draw(runningTime));
+            drawPieChart();
             requestAnimationFrame(animate);
         }
 
