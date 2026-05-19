@@ -88,15 +88,14 @@
             };
         }
 
-        // Draw Deformed Circle (Mushy Effect)
-        function drawDeformedCircle(ctx, x, y, radius, deformation, time) {
+        // Draw Membrane Effect (Bouncy/Mushy)
+        function drawMembraneCircle(ctx, x, y, radius, deformation) {
             ctx.beginPath();
-            const segments = 16;
+            const segments = 32;
             for (let i = 0; i <= segments; i++) {
                 const angle = (i / segments) * 2 * Math.PI;
-                // Add noise based on deformation and time for "mushy" feel
-                const noise = Math.sin(angle * 5 + time * 0.02) * deformation * 15;
-                const r = radius + noise;
+                // Deform based on a simple elliptical squash-and-stretch
+                const r = radius * (1 + Math.sin(angle * 2) * deformation * 0.2);
                 const px = x + r * Math.cos(angle);
                 const py = y + r * Math.sin(angle);
                 if (i === 0) ctx.moveTo(px, py);
@@ -128,16 +127,16 @@
                 const zone = zones[i];
                 
                 // Update deformation
-                if (zone.deformation > 0) zone.deformation -= 0.02;
+                if (zone.deformation > 0) zone.deformation -= 0.05;
                 if (zone.deformation < 0) zone.deformation = 0;
 
-                // Vibration (agitation based on count)
-                const vibration = count > 1 ? (Math.random() - 0.5) * count * 2 : 0;
+                // Vibration (agitation) - Only when not paused
+                const vibration = (!isPaused && count > 1) ? (Math.random() - 0.5) * count * 4 : 0;
 
                 const pulseIntensity = 1 + count * 0.3;
                 const finalScale = pulse * pulseIntensity;
 
-                drawDeformedCircle(ctx, pos.x + vibration, pos.y + vibration, zoneRadius * finalScale, zone.deformation * 2, time);
+                drawMembraneCircle(ctx, pos.x + vibration, pos.y + vibration, zoneRadius * finalScale, zone.deformation);
                 
                 ctx.strokeStyle = count >= 3 ? '#f00' : count === 2 ? '#ff0' : count === 1 ? '#0f0' : '#fff';
                 ctx.lineWidth = 2 * finalScale;
@@ -173,10 +172,14 @@
                 if (isStretched) {
                     ctx.ellipse(x, y, awarenessRadius * 1.5, awarenessRadius, angleToTarget, 0, 2 * Math.PI);
                     ctx.fillStyle = '#ff0';
+                    ctx.strokeStyle = '#b8860b'; // Darker gold
                 } else {
                     ctx.arc(x, y, awarenessRadius, 0, 2 * Math.PI);
                     ctx.fillStyle = '#0f0';
+                    ctx.strokeStyle = '#006400'; // Dark green
                 }
+                ctx.lineWidth = 2;
+                ctx.stroke();
                 ctx.fill();
             });
         }
@@ -204,7 +207,7 @@
                         node.progress += dt / speed;
                         if (node.progress >= 1) {
                             node.progress = 0;
-                            // Trigger deformation upon arrival
+                            // Trigger membrane deformation upon arrival
                             zones[node.targetZoneIndex].deformation = 1;
                             
                             node.currentZoneIndex = node.targetZoneIndex;
