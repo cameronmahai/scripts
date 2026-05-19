@@ -24,13 +24,20 @@
     <div id="controls">
         <label>Ball Speed: <input type="range" id="ballSpeed" min="100" max="2000" value="500"></label><br>
         <label>Rotation Speed: <input type="range" id="rotSpeed" min="0" max="50" value="10"></label><br>
-        <label>Num Balls: <input type="range" id="numBalls" min="1" max="5" value="1"></label>
+        <label>Num Balls: <input type="range" id="numBalls" min="1" max="5" value="1"></label><br>
+        <button id="pauseBtn">Pause</button>
     </div>
     <canvas id="canvas"></canvas>
     <script>
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
         let width, height;
+        let isPaused = false;
+
+        document.getElementById('pauseBtn').addEventListener('click', (e) => {
+            isPaused = !isPaused;
+            e.target.innerText = isPaused ? 'Resume' : 'Pause';
+        });
 
         function resize() {
             width = canvas.width = window.innerWidth;
@@ -201,48 +208,58 @@
         }
 
         let totalRotation = 0;
+        let lastTimestamp = performance.now();
         function animate(currentTime) {
-            // Update num balls
-            const targetNumBalls = parseInt(document.getElementById('numBalls').value);
-            while (balls.length < targetNumBalls) {
-                balls.push(createBall());
-            }
-            while (balls.length > targetNumBalls) {
-                balls.pop();
-            }
-
-            const ballSpeed = parseInt(document.getElementById('ballSpeed').value);
-            const rotSpeed = parseInt(document.getElementById('rotSpeed').value) / 1000;
-
-            totalRotation += rotSpeed;
-
-            balls.forEach(ball => {
-                const deltaTime = currentTime - ball.lastTime;
-                ball.lastTime = currentTime;
-
-                if (ball.isMoving) {
-                    ball.progress += deltaTime / ballSpeed;
-                    if (ball.progress >= 1) {
-                        ball.progress = 0;
-                        ball.currentCircleIndex = ball.targetCircleIndex;
-                        
-                        shapes[ball.currentCircleIndex].reactionProgress = 1;
-                        
-                        let nextTarget;
-                        do {
-                            nextTarget = Math.floor(Math.random() * numCircles);
-                        } while (nextTarget === ball.currentCircleIndex);
-                        
-                        ball.targetCircleIndex = nextTarget;
-                        ball.isMoving = false;
-                        ball.pauseStartTime = currentTime;
-                    }
-                } else {
-                    if (currentTime - ball.pauseStartTime > 500) {
-                        ball.isMoving = true;
-                    }
+            if (!isPaused) {
+                const deltaTime = currentTime - lastTimestamp;
+                
+                // Update num balls
+                const targetNumBalls = parseInt(document.getElementById('numBalls').value);
+                while (balls.length < targetNumBalls) {
+                    balls.push(createBall());
                 }
-            });
+                while (balls.length > targetNumBalls) {
+                    balls.pop();
+                }
+
+                const ballSpeed = parseInt(document.getElementById('ballSpeed').value);
+                const rotSpeed = parseInt(document.getElementById('rotSpeed').value) / 1000;
+
+                totalRotation += rotSpeed;
+
+                balls.forEach(ball => {
+                    const ballDeltaTime = currentTime - ball.lastTime;
+                    ball.lastTime = currentTime;
+
+                    if (ball.isMoving) {
+                        ball.progress += ballDeltaTime / ballSpeed;
+                        if (ball.progress >= 1) {
+                            ball.progress = 0;
+                            ball.currentCircleIndex = ball.targetCircleIndex;
+                            
+                            shapes[ball.currentCircleIndex].reactionProgress = 1;
+                            
+                            let nextTarget;
+                            do {
+                                nextTarget = Math.floor(Math.random() * numCircles);
+                            } while (nextTarget === ball.currentCircleIndex);
+                            
+                            ball.targetCircleIndex = nextTarget;
+                            ball.isMoving = false;
+                            ball.pauseStartTime = currentTime;
+                        }
+                    } else {
+                        if (currentTime - ball.pauseStartTime > 500) {
+                            ball.isMoving = true;
+                        }
+                    }
+                });
+                
+                lastTimestamp = currentTime;
+            } else {
+                // If paused, keep track of time to avoid jumps
+                lastTimestamp = currentTime;
+            }
 
             draw(totalRotation);
             requestAnimationFrame(animate);
