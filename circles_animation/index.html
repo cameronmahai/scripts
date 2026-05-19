@@ -56,7 +56,7 @@
         const zones = [];
         for (let i = 0; i < numZones; i++) {
             const angle = (i / numZones) * 2 * Math.PI;
-            zones.push({ initialAngle: angle });
+            zones.push({ initialAngle: angle, deformation: 0 });
         }
 
         let awarenessNodes = [];
@@ -88,13 +88,28 @@
             };
         }
 
+        // Draw Deformed Circle (Mushy Effect)
+        function drawDeformedCircle(ctx, x, y, radius, deformation, time) {
+            ctx.beginPath();
+            const segments = 16;
+            for (let i = 0; i <= segments; i++) {
+                const angle = (i / segments) * 2 * Math.PI;
+                // Add noise based on deformation and time for "mushy" feel
+                const noise = Math.sin(angle * 5 + time * 0.02) * deformation * 15;
+                const r = radius + noise;
+                const px = x + r * Math.cos(angle);
+                const py = y + r * Math.sin(angle);
+                if (i === 0) ctx.moveTo(px, py);
+                else ctx.lineTo(px, py);
+            }
+            ctx.closePath();
+        }
+
         function draw(rotation, time) {
             ctx.clearRect(0, 0, width, height);
 
-            const ballsOnZone = {};
-            // Group nodes to handle overlap
             const nodeGroups = {};
-            awarenessNodes.forEach((node, idx) => {
+            awarenessNodes.forEach(node => {
                 const zoneIdx = node.isMoving ? -1 : node.currentZoneIndex;
                 if (zoneIdx !== -1) {
                     if (!nodeGroups[zoneIdx]) nodeGroups[zoneIdx] = [];
@@ -104,28 +119,32 @@
 
             const currentPositions = zones.map(z => getZonePosition(z, rotation));
 
-            // Pulse Speed
             const pulseSpeed = parseInt(document.getElementById('pulseSpeed').value) / 1000;
             const pulse = Math.sin(time * pulseSpeed) * 0.2 + 0.8;
 
             currentPositions.forEach((pos, i) => {
                 const nodes = nodeGroups[i] || [];
                 const count = nodes.length;
-                const pulseIntensity = 1 + count * 0.5;
+                const zone = zones[i];
+                
+                // Update deformation
+                if (zone.deformation > 0) zone.deformation -= 0.02;
+                if (zone.deformation < 0) zone.deformation = 0;
+
+                // Vibration (agitation based on count)
+                const vibration = count > 1 ? (Math.random() - 0.5) * count * 2 : 0;
+
+                const pulseIntensity = 1 + count * 0.3;
                 const finalScale = pulse * pulseIntensity;
 
-                ctx.beginPath();
-                ctx.arc(pos.x, pos.y, zoneRadius * finalScale, 0, 2 * Math.PI);
+                drawDeformedCircle(ctx, pos.x + vibration, pos.y + vibration, zoneRadius * finalScale, zone.deformation * 2, time);
                 
-                // Color based on count: 1=Green, 2=Yellow, 3+=Red
                 ctx.strokeStyle = count >= 3 ? '#f00' : count === 2 ? '#ff0' : count === 1 ? '#0f0' : '#fff';
-                
                 ctx.lineWidth = 2 * finalScale;
                 ctx.stroke();
             });
 
-            // Draw Awareness Nodes
-            awarenessNodes.forEach((node, idx) => {
+            awarenessNodes.forEach((node) => {
                 let x, y, isStretched = false, angleToTarget = 0;
 
                 if (node.isMoving) {
@@ -185,6 +204,9 @@
                         node.progress += dt / speed;
                         if (node.progress >= 1) {
                             node.progress = 0;
+                            // Trigger deformation upon arrival
+                            zones[node.targetZoneIndex].deformation = 1;
+                            
                             node.currentZoneIndex = node.targetZoneIndex;
                             node.targetZoneIndex = getWeightedNextZone(node.currentZoneIndex);
                             node.isMoving = false;
