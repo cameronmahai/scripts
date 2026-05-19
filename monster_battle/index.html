@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forest Monster RPG</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="game-container">
+        <canvas id="gameCanvas"></canvas>
+        <div id="battle-ui" class="hidden">
+            <h2 id="battle-text">A wild monster appeared!</h2>
+            <div id="battle-actions">
+                <button onclick="battleAction('attack')">Attack</button>
+                <button onclick="battleAction('catch')">Catch</button>
+                <button onclick="battleAction('run')">Run</button>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
