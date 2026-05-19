@@ -3,15 +3,17 @@ let wordQueue = [];
 let currentWord = {};
 let score = 0;
 let strikes = 0;
+let timerInterval = null;
+let timeLeft = 3000;
 
 const farsiWordEl = document.getElementById('farsi-word');
 const inputEl = document.getElementById('translation-input');
 const feedbackEl = document.getElementById('feedback');
 const scoreEl = document.getElementById('score');
 const strikesEl = document.getElementById('strikes');
+const timerEl = document.getElementById('timer');
 const submitBtn = document.getElementById('submit-btn');
 
-// Load dictionary from JSON file
 async function loadDictionary() {
     try {
         const response = await fetch('dictionary.json');
@@ -25,12 +27,25 @@ async function loadDictionary() {
 }
 
 function resetQueue() {
-    // Fisher-Yates shuffle
     wordQueue = [...baseDictionary];
     for (let i = wordQueue.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [wordQueue[i], wordQueue[j]] = [wordQueue[j], wordQueue[i]];
     }
+}
+
+function startTimer() {
+    clearInterval(timerInterval);
+    timeLeft = 3000;
+    timerEl.innerText = "3.00";
+    timerInterval = setInterval(() => {
+        timeLeft -= 10;
+        timerEl.innerText = (timeLeft / 1000).toFixed(2);
+        if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            registerStrike("Too slow!");
+        }
+    }, 10);
 }
 
 function nextWord() {
@@ -42,11 +57,29 @@ function nextWord() {
     inputEl.value = '';
     feedbackEl.innerText = '';
     inputEl.focus();
+    startTimer();
+}
+
+function registerStrike(message) {
+    clearInterval(timerInterval);
+    strikes++;
+    strikesEl.innerText = strikes;
+    feedbackEl.innerText = `${message} (Word was "${currentWord.english}")`;
+    feedbackEl.style.color = "red";
+    
+    if (strikes >= 3) {
+        strikes = 0;
+        strikesEl.innerText = strikes;
+        setTimeout(nextWord, 2000);
+    } else {
+        setTimeout(nextWord, 1000);
+    }
 }
 
 function checkAnswer() {
     const translation = inputEl.value.trim().toLowerCase();
     if (translation === currentWord.english) {
+        clearInterval(timerInterval);
         score++;
         scoreEl.innerText = score;
         feedbackEl.innerText = "Correct!";
@@ -55,16 +88,7 @@ function checkAnswer() {
         strikesEl.innerText = strikes;
         setTimeout(nextWord, 1000);
     } else {
-        strikes++;
-        strikesEl.innerText = strikes;
-        feedbackEl.innerText = "Wrong!";
-        feedbackEl.style.color = "red";
-        if (strikes >= 3) {
-            feedbackEl.innerText = `Too many strikes! The word was "${currentWord.english}"`;
-            strikes = 0;
-            strikesEl.innerText = strikes;
-            setTimeout(nextWord, 2000);
-        }
+        registerStrike("Wrong!");
     }
 }
 

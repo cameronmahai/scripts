@@ -3,3 +3,4 @@ body { font-family: sans-serif; text-align: center; background: #f0f0f0; }
 input { padding: 10px; width: 80%; }
 button { padding: 10px 20px; }
 #feedback { font-weight: bold; }
+#timer { color: red; font-weight: bold; }
