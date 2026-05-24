@@ -92,6 +92,15 @@ sed -i "s|^@define-color text-color .*$|@define-color text-color $text_color;|g"
 # Reboot waybar
 pkill -SIGUSR2 waybar
 
+# Update Hyprland border colors
+
+hypr_config_dir="$HOME/.config/hypr/hyprland.conf"
+accent_hex=${accent_color#\#}
+bg_hex=${bg_color#\#}
+
+sed -i "s/col.active_border = .*$/col.active_border = 0xff$accent_hex/g" $hypr_config_dir
+sed -i "s/col.inactive_border = .*$/col.inactive_border = 0xaa$bg_hex/g" $hypr_config_dir
+
 
 
 
