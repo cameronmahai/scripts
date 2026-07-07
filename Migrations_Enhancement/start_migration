@@ -92,15 +92,19 @@ if ! minikube status >/dev/null 2>&1; then
     minikube start
 fi
 
+# Sanitize merchant_id for use as a Kubernetes resource name
+# (lowercase, replace anything not alphanumeric/hyphen with '-', trim leading/trailing hyphens)
+k8s_name=$(echo "$merchant_id" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9-]/-/g' | sed 's/^-*//' | sed 's/-*$//')
+
 # Create Kubernetes secret for the GPG key and passphrase
 echo "Storing PGP key and passphrase in Kubernetes Secret..."
-minikube kubectl -- delete secret "pgp-secret-$merchant_id" --ignore-not-found
-minikube kubectl -- create secret generic "pgp-secret-$merchant_id" \
+minikube kubectl -- delete secret "pgp-secret-$k8s_name" --ignore-not-found
+minikube kubectl -- create secret generic "pgp-secret-$k8s_name" \
   --from-literal=key.asc="$pgp_key_content" \
   --from-literal=passphrase="$pgp_passphrase"
 
-# 1. Create a pod named with the Merchant ID
-"$SCRIPT_DIR/pod/create" "$merchant_id"
+# 1. Create a pod named with the sanitized Merchant ID
+"$SCRIPT_DIR/pod/create" "$k8s_name"
 
 # 2. Create local directory with Merchant Name (handling spaces gracefully)
 mkdir -p "$merchant_name"
@@ -120,7 +124,7 @@ get *
 EOF
 
 # 6. Upload the merchant directory (containing sftp files and merchant_id.txt) to the pod
-"$SCRIPT_DIR/pod/upload" "$merchant_id" "$merchant_name"
+"$SCRIPT_DIR/pod/upload" "$k8s_name" "$merchant_name"
 
 # 7. Connect to the pod
-"$SCRIPT_DIR/pod/connect" "$merchant_id"
+"$SCRIPT_DIR/pod/connect" "$k8s_name"
