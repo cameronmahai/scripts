@@ -1,0 +1,28 @@
+#!/bin/bash
+set -e
+
+if [ -z "$1" ] || [ -z "$2" ]; then
+    echo "Usage: $0 [POD_NAME] [DIRECTORY_NAME]" >&2
+    exit 1
+fi
+
+POD_NAME="$1"
+DIRECTORY_NAME="$2"
+
+if [ ! -d "$DIRECTORY_NAME" ]; then
+    echo "Error: Local directory '$DIRECTORY_NAME' does not exist." >&2
+    exit 1
+fi
+
+# Get the basename of the directory
+DIR_BASENAME=$(basename "$DIRECTORY_NAME")
+
+echo "Uploading directory '$DIRECTORY_NAME' to pod '$POD_NAME' as '/tmp/$DIR_BASENAME'..."
+
+# Create parent /tmp directory in the pod if not exists
+minikube kubectl -- exec "$POD_NAME" -- mkdir -p /tmp
+
+# Copy the directory to the pod
+minikube kubectl -- cp "$DIRECTORY_NAME" "$POD_NAME":"/tmp/$DIR_BASENAME"
+
+echo "Upload successful."

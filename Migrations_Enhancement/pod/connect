@@ -1,0 +1,47 @@
+#!/bin/bash
+set -e
+
+if [ -z "$1" ]; then
+    echo "Usage: $0 [POD_NAME]" >&2
+    exit 1
+fi
+
+POD_NAME="$1"
+
+echo "Connecting to pod '$POD_NAME'..."
+minikube kubectl -- exec -it "$POD_NAME" -- /bin/sh -c '
+  if which gpg >/dev/null 2>&1; then
+    echo "GPG found in pod. Checking for encrypted files to decrypt..."
+    found=0
+    for file in $(find /tmp -type f \( -name "*.gpg" -o -name "*.pgp" \) 2>/dev/null); do
+      [ -f "$file" ] || continue
+      found=1
+      decrypted_file="${file%.*}"
+      echo "Decrypting $file -> $decrypted_file..."
+      if [ -f /etc/gpg-keys/passphrase ]; then
+        gpg --batch --yes --pinentry-mode loopback --passphrase-file /etc/gpg-keys/passphrase --decrypt --output "$decrypted_file" "$file" && rm "$file"
+      else
+        gpg --batch --yes --pinentry-mode loopback --decrypt --output "$decrypted_file" "$file" && rm "$file"
+      fi
+      
+      if [ -f "$decrypted_file" ]; then
+        echo ""
+        echo "=== Line Count for $decrypted_file ==="
+        wc -l "$decrypted_file"
+        echo ""
+        echo "=== First 10 lines of $decrypted_file ==="
+        head -n 10 "$decrypted_file"
+        echo "========================================"
+        echo ""
+      fi
+    done
+    if [ "$found" -eq 0 ]; then
+      echo "No encrypted (.gpg/.pgp) files found in /tmp."
+    fi
+  else
+    echo "Warning: GPG not found in pod. Skipping decryption."
+  fi
+  
+  echo "Dropping into interactive shell..."
+  exec /bin/sh
+'

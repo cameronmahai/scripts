@@ -1,0 +1,85 @@
+#!/bin/bash
+
+# Exit on error
+set -e
+
+# Get script directory for robust pathing
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Prompt user for inputs
+read -p "Enter Merchant Name: " merchant_name
+if [ -z "$merchant_name" ]; then
+    echo "Error: Merchant Name cannot be empty." >&2
+    exit 1
+fi
+
+read -p "Enter Merchant ID: " merchant_id
+if [ -z "$merchant_id" ]; then
+    echo "Error: Merchant ID cannot be empty." >&2
+    exit 1
+fi
+
+read -p "Enter SFTP Host: " sftp_host
+if [ -z "$sftp_host" ]; then
+    echo "Error: SFTP Host cannot be empty." >&2
+    exit 1
+fi
+
+read -p "Enter SFTP Username: " sftp_username
+if [ -z "$sftp_username" ]; then
+    echo "Error: SFTP Username cannot be empty." >&2
+    exit 1
+fi
+
+echo "Paste your PGP Private Key block below (press Ctrl+D on a new line when finished):"
+pgp_key_content=$(cat)
+if [ -z "$pgp_key_content" ]; then
+    echo "Error: PGP Private Key cannot be empty." >&2
+    exit 1
+fi
+
+read -s -p "Enter PGP Key Passphrase: " pgp_passphrase
+echo # Newline after hidden password input
+if [ -z "$pgp_passphrase" ]; then
+    echo "Error: PGP Key Passphrase cannot be empty." >&2
+    exit 1
+fi
+
+# Check if minikube is running, if not start it
+if ! minikube status >/dev/null 2>&1; then
+    echo "Minikube is not running. Starting minikube..."
+    minikube start
+fi
+
+# Create Kubernetes secret for the GPG key and passphrase
+echo "Storing PGP key and passphrase in Kubernetes Secret..."
+minikube kubectl -- delete secret "pgp-secret-$merchant_id" --ignore-not-found
+minikube kubectl -- create secret generic "pgp-secret-$merchant_id" \
+  --from-literal=key.asc="$pgp_key_content" \
+  --from-literal=passphrase="$pgp_passphrase"
+
+# 1. Create a pod named with the Merchant ID
+"$SCRIPT_DIR/pod/create" "$merchant_id"
+
+# 2. Create local directory with Merchant Name (handling spaces gracefully)
+mkdir -p "$merchant_name"
+
+# 3. Store the Merchant ID in a file
+echo "$merchant_id" > "$merchant_name/merchant_id.txt"
+
+# 4. Create a subdirectory for SFTP files
+sftp_dir="$merchant_name/sftp"
+mkdir -p "$sftp_dir"
+
+# 5. Retrieve all files from the SFTP server
+echo "Connecting to SFTP server at $sftp_host..."
+sftp -o StrictHostKeyChecking=no "$sftp_username@$sftp_host" <<EOF
+lcd "$sftp_dir"
+get *
+EOF
+
+# 6. Upload the merchant directory (containing sftp files and merchant_id.txt) to the pod
+"$SCRIPT_DIR/pod/upload" "$merchant_id" "$merchant_name"
+
+# 7. Connect to the pod
+"$SCRIPT_DIR/pod/connect" "$merchant_id"

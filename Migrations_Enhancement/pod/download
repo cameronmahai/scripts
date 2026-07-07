@@ -1,0 +1,23 @@
+#!/bin/bash
+set -e
+
+if [ -z "$1" ] || [ -z "$2" ]; then
+    echo "Usage: $0 [POD_NAME] [DIRECTORY_NAME]" >&2
+    exit 1
+fi
+
+POD_NAME="$1"
+DIRECTORY_NAME="$2"
+
+DIR_BASENAME=$(basename "$DIRECTORY_NAME")
+
+# Create local parent directory if it doesn't exist
+LOCAL_PARENT=$(dirname "$DIRECTORY_NAME")
+if [ ! -d "$LOCAL_PARENT" ]; then
+    mkdir -p "$LOCAL_PARENT"
+fi
+
+echo "Downloading directory '/tmp/$DIR_BASENAME' from pod '$POD_NAME' to '$DIRECTORY_NAME'..."
+minikube kubectl -- cp "$POD_NAME":"/tmp/$DIR_BASENAME" "$DIRECTORY_NAME"
+
+echo "Download successful."

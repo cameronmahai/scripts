@@ -1,0 +1,52 @@
+#!/bin/bash
+set -e
+
+if [ -z "$1" ]; then
+    echo "Usage: $0 [POD_NAME]" >&2
+    exit 1
+fi
+
+POD_NAME="$1"
+
+# Check if minikube is running, if not start it
+if ! minikube status >/dev/null 2>&1; then
+    echo "Minikube is not running. Starting minikube..."
+    minikube start
+fi
+
+# Clean up any existing pod of the same name first
+echo "Cleaning up any existing pod named '$POD_NAME'..."
+minikube kubectl -- delete pod "$POD_NAME" --ignore-not-found >/dev/null 2>&1
+
+if minikube kubectl -- get secret "pgp-secret-$POD_NAME" >/dev/null 2>&1; then
+    echo "Creating pod '$POD_NAME' with GPG key mounted..."
+    minikube kubectl -- run "$POD_NAME" --image=alpine --restart=Never \
+      --overrides='{
+        "spec": {
+          "containers": [{
+            "name": "'"$POD_NAME"'",
+            "image": "alpine",
+            "command": ["/bin/sh", "-c", "apk add --no-cache gnupg && gpg --batch --pinentry-mode loopback --import /etc/gpg-keys/key.asc && sleep infinity"],
+            "volumeMounts": [{
+              "name": "pgp-key-vol",
+              "mountPath": "/etc/gpg-keys",
+              "readOnly": true
+            }]
+          }],
+          "volumes": [{
+            "name": "pgp-key-vol",
+            "secret": {
+              "secretName": "pgp-secret-'"$POD_NAME"'"
+            }
+          }]
+        }
+      }'
+else
+    echo "Creating pod '$POD_NAME' (no GPG key found)..."
+    minikube kubectl -- run "$POD_NAME" --image=alpine --restart=Never -- sleep infinity
+fi
+
+echo "Waiting for pod '$POD_NAME' to be ready..."
+minikube kubectl -- wait --for=condition=Ready pod/"$POD_NAME" --timeout=60s
+
+echo "Pod '$POD_NAME' created and ready."
