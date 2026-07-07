@@ -19,18 +19,6 @@ if [ -z "$merchant_id" ]; then
     exit 1
 fi
 
-read -p "Enter SFTP Host: " sftp_host
-if [ -z "$sftp_host" ]; then
-    echo "Error: SFTP Host cannot be empty." >&2
-    exit 1
-fi
-
-read -p "Enter SFTP Username: " sftp_username
-if [ -z "$sftp_username" ]; then
-    echo "Error: SFTP Username cannot be empty." >&2
-    exit 1
-fi
-
 echo "Paste your PGP Private Key block below (press Ctrl+D on a new line when finished):"
 pgp_key_content=$(cat)
 if [ -z "$pgp_key_content" ]; then
@@ -43,6 +31,59 @@ echo # Newline after hidden password input
 if [ -z "$pgp_passphrase" ]; then
     echo "Error: PGP Key Passphrase cannot be empty." >&2
     exit 1
+fi
+
+# Ask how to provide SFTP credentials
+echo ""
+read -p "Are your SFTP credentials PGP-encrypted? [y/N]: " sftp_encrypted
+
+if [[ "$sftp_encrypted" =~ ^[Yy]$ ]]; then
+    echo "Paste the PGP-encrypted SFTP credentials blurb below (press Ctrl+D on a new line when finished):"
+    sftp_blurb=$(cat)
+    if [ -z "$sftp_blurb" ]; then
+        echo "Error: Encrypted SFTP credentials cannot be empty." >&2
+        exit 1
+    fi
+
+    # Decrypt the blurb using a temporary isolated GPG keyring (never touches ~/.gnupg)
+    echo "Decrypting SFTP credentials..."
+    TEMP_GNUPGHOME=$(mktemp -d)
+    chmod 700 "$TEMP_GNUPGHOME"
+    trap "rm -rf '$TEMP_GNUPGHOME'" EXIT
+
+    export GNUPGHOME="$TEMP_GNUPGHOME"
+    echo "$pgp_key_content" | gpg --batch --import 2>/dev/null
+    decrypted_sftp=$(echo "$sftp_blurb" | gpg --batch --yes --pinentry-mode loopback \
+        --passphrase "$pgp_passphrase" --decrypt 2>/dev/null)
+    unset GNUPGHOME
+
+    # Parse host and username from decrypted output
+    # Expected format (flexible): lines containing "host:" and "username:" (case-insensitive)
+    sftp_host=$(echo "$decrypted_sftp" | grep -i 'host' | head -1 | sed 's/.*[Hh]ost[^:]*:[[:space:]]*//')
+    sftp_username=$(echo "$decrypted_sftp" | grep -i 'user' | head -1 | sed 's/.*[Uu]ser[^:]*:[[:space:]]*//')
+
+    if [ -z "$sftp_host" ] || [ -z "$sftp_username" ]; then
+        echo "Error: Could not parse SFTP Host and Username from decrypted content." >&2
+        echo "Decrypted content was:" >&2
+        echo "$decrypted_sftp" >&2
+        exit 1
+    fi
+
+    echo "SFTP credentials decrypted successfully."
+    echo "  Host:     $sftp_host"
+    echo "  Username: $sftp_username"
+else
+    read -p "Enter SFTP Host: " sftp_host
+    if [ -z "$sftp_host" ]; then
+        echo "Error: SFTP Host cannot be empty." >&2
+        exit 1
+    fi
+
+    read -p "Enter SFTP Username: " sftp_username
+    if [ -z "$sftp_username" ]; then
+        echo "Error: SFTP Username cannot be empty." >&2
+        exit 1
+    fi
 fi
 
 # Check if minikube is running, if not start it
