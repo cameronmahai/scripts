@@ -1,0 +1,28 @@
+# Private keys and key material
+*.asc
+*.pem
+*.key
+*.p12
+*.pfx
+private*
+secret*
+
+# Encrypted data files
+*.gpg
+*.pgp
+
+# Merchant data directories
+Migrations_Enhancement/*/
+!Migrations_Enhancement/pod/
+!Migrations_Enhancement/pod/**
+
+# Credential files
+*credentials*.txt
+*_creds.*
+secretserver_api_credentials.txt
+sftp_credentials.txt
+
+# OS / editor clutter
+.DS_Store
+*.swp
+*.swo
