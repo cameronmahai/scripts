@@ -57,10 +57,11 @@ if [[ "$sftp_encrypted" =~ ^[Yy]$ ]]; then
         --passphrase "$pgp_passphrase" --decrypt 2>/dev/null)
     unset GNUPGHOME
 
-    # Parse host and username from decrypted output
-    # Expected format (flexible): lines containing "host:" and "username:" (case-insensitive)
+    # Parse host, username, and password from decrypted output
+    # Expected format (flexible): lines containing "host:", "user:", "pass:" (case-insensitive)
     sftp_host=$(echo "$decrypted_sftp" | grep -i 'host' | head -1 | sed 's/.*[Hh]ost[^:]*:[[:space:]]*//')
     sftp_username=$(echo "$decrypted_sftp" | grep -i 'user' | head -1 | sed 's/.*[Uu]ser[^:]*:[[:space:]]*//')
+    sftp_password=$(echo "$decrypted_sftp" | grep -i 'pass' | head -1 | sed 's/.*[Pp]ass[^:]*:[[:space:]]*//')
 
     if [ -z "$sftp_host" ] || [ -z "$sftp_username" ]; then
         echo "Error: Could not parse SFTP Host and Username from decrypted content." >&2
@@ -72,6 +73,10 @@ if [[ "$sftp_encrypted" =~ ^[Yy]$ ]]; then
     echo "SFTP credentials decrypted successfully."
     echo "  Host:     $sftp_host"
     echo "  Username: $sftp_username"
+    if [ -n "$sftp_password" ]; then
+        echo "  Password: $sftp_password"
+        echo "  (Copy the password above — you will be prompted for it when connecting to the SFTP server)"
+    fi
 else
     read -p "Enter SFTP Host: " sftp_host
     if [ -z "$sftp_host" ]; then
